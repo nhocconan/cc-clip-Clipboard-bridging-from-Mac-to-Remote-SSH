@@ -221,8 +221,9 @@ func runConnect(opts connectOpts) {
 error: N0 v0.7.0 detection could not run on remote (%v), and cc-clip could not
        confirm the remote has no existing claude install, so it will not
        continue — a present install might be in a corrupted v0.7.0 state.
-       Ensure POSIX coreutils (readlink, head, grep, wc, tr) are available on
-       the non-interactive SSH PATH, then retry:
+       Check the SSH diagnostic above first (exit 255 indicates an SSH failure).
+       If the command reports missing utilities, ensure readlink, head, grep,
+       wc and tr are available on the non-interactive SSH PATH, then retry:
 
     cc-clip connect %s
 `, err, host)

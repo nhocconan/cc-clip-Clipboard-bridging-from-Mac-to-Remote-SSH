@@ -122,11 +122,14 @@ func TestConnArgsWithControlPath(t *testing.T) {
 		controlPath: "/tmp/cc-clip-ssh-test",
 	}
 	args := s.connArgs()
-	if len(args) != 2 {
-		t.Fatalf("expected 2 args, got %d: %v", len(args), args)
+	if len(args) != 4 {
+		t.Fatalf("expected 4 args, got %d: %v", len(args), args)
 	}
 	if args[0] != "-o" {
 		t.Errorf("args[0] = %q, want '-o'", args[0])
+	}
+	if args[2] != "-o" || args[3] != "ClearAllForwardings=yes" {
+		t.Fatalf("session must suppress inherited forwards: %v", args)
 	}
 	if args[1] != "ControlPath=/tmp/cc-clip-ssh-test" {
 		t.Errorf("args[1] = %q, want ControlPath=...", args[1])
@@ -1030,5 +1033,24 @@ func TestRemoteSecretWriteReplacesTheInode(t *testing.T) {
 	}
 	if len(entries) != 1 {
 		t.Errorf("temp file left behind: %v", entries)
+	}
+}
+
+// Opt-in check against an SSH alias with RemoteForward and ExitOnForwardFailure.
+func TestSSHSessionLiveNoForward(t *testing.T) {
+	host := os.Getenv("CC_CLIP_SSH_TEST_HOST")
+	if host == "" {
+		t.Skip("set CC_CLIP_SSH_TEST_HOST for live SSH verification")
+	}
+	session, err := NewSSHSession(host)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer session.Close()
+	for i := 0; i < 2; i++ {
+		out, err := session.Exec("printf cc-clip-session-ok")
+		if err != nil || out != "cc-clip-session-ok" {
+			t.Fatalf("Exec = %q, %v", out, err)
+		}
 	}
 }

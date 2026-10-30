@@ -109,11 +109,12 @@ func NewSSHSessionWithControlPath(host, controlPath string) (*SSHSession, error)
 }
 
 // connArgs returns the SSH connection arguments for this session.
-// With ControlMaster: uses ControlPath. Without (Windows): uses ClearAllForwardings
-// to prevent user's RemoteForward from triggering on every independent invocation.
+// Suppress inherited forwards even on multiplexed clients: OpenSSH requests
+// configured forwards again before running each remote command.
 func (s *SSHSession) connArgs() []string {
 	if s.controlPath != "" {
-		return []string{"-o", fmt.Sprintf("ControlPath=%s", s.controlPath)}
+		return []string{"-o", fmt.Sprintf("ControlPath=%s", s.controlPath),
+			"-o", "ClearAllForwardings=yes"}
 	}
 	return []string{"-o", "ClearAllForwardings=yes"}
 }
@@ -178,6 +179,10 @@ func (s *SSHSession) sshArgs(cmd string) []string {
 func (s *SSHSession) Exec(cmd string) (string, error) {
 	c := exec.Command("ssh", s.sshArgs(cmd)...)
 	out, err := c.Output()
+	var exitErr *exec.ExitError
+	if errors.As(err, &exitErr) && len(exitErr.Stderr) > 0 {
+		err = fmt.Errorf("%w: %s", err, strings.TrimSpace(string(exitErr.Stderr)))
+	}
 	return strings.TrimSpace(string(out)), err
 }
 
