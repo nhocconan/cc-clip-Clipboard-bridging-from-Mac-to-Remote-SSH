@@ -22,7 +22,7 @@ CC_CLIP_ADDR="127.0.0.1:${CC_CLIP_PORT}"
 CC_CLIP_TOKEN_FILE="${CC_CLIP_TOKEN_FILE:-${HOME}/.cache/cc-clip/session.token}"
 CC_CLIP_SESSION_FILE="${CC_CLIP_SESSION_FILE:-${HOME}/.cache/cc-clip/session.id}"
 CC_CLIP_PROBE_TIMEOUT_MS="${CC_CLIP_PROBE_TIMEOUT_MS:-500}"
-CC_CLIP_FETCH_TIMEOUT_MS="${CC_CLIP_FETCH_TIMEOUT_MS:-5000}"
+CC_CLIP_WRITE_TIMEOUT_MS="${CC_CLIP_WRITE_TIMEOUT_MS:-${CC_CLIP_FETCH_TIMEOUT_MS:-5000}}"
 REAL_WL_COPY="%s"
 _CC_CLIP_SELF_PATH="${BASH_SOURCE[0]:-$0}"
 case "$_CC_CLIP_SELF_PATH" in
@@ -123,7 +123,7 @@ _cc_clip_post_text() {
     local token
     token=$(_cc_clip_read_token) || return 12
     local timeout_s
-    timeout_s=$(awk "BEGIN {printf \"%%f\", ${CC_CLIP_FETCH_TIMEOUT_MS}/1000}")
+    timeout_s=$(awk "BEGIN {printf \"%%f\", ${CC_CLIP_WRITE_TIMEOUT_MS}/1000}")
     local session_hdr
     session_hdr=$(_cc_clip_session_header)
     _cc_clip_curl_config "$token" "$session_hdr" | curl -sf --max-time "$timeout_s" \

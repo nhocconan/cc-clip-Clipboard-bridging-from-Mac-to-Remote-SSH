@@ -110,6 +110,7 @@ and tmux copy-mode — is covered in [reverse copy](reverse-copy.md).
 | Max clipboard image | 20MB | `CC_CLIP_MAX_IMAGE_MB` |
 | Probe timeout | 500ms | `CC_CLIP_PROBE_TIMEOUT_MS` |
 | Fetch timeout | 15000ms | `CC_CLIP_FETCH_TIMEOUT_MS` |
+| Text write timeout (`xclip`/`wl-copy` copy) | 5000ms, or `CC_CLIP_FETCH_TIMEOUT_MS` when set | `CC_CLIP_WRITE_TIMEOUT_MS` |
 | Debug logs | off | `CC_CLIP_DEBUG=1` |
 
 > Size limits apply to the local daemon (`cc-clip serve`) and Go fetch clients
