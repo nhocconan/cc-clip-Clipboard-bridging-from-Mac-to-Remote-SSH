@@ -15,7 +15,7 @@
 > これは英語版の日本語訳です。内容に差異がある場合は [English 原文](README.md) を正とします。この翻訳は英語版のメインラインより遅れている場合があります。
 
 <p align="center">
-  <a href="https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/releases"><img src="https://img.shields.io/github/v/release/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH?color=F97316" alt="最新リリース"></a>
+  <a href="README.md#1-install"><img src="https://img.shields.io/badge/install-build_from_source-blue" alt="Install from source"></a>
   <a href="https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/actions/workflows/ci.yml"><img src="https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/actions/workflows/ci.yml/badge.svg" alt="CI ステータス"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-18181B.svg" alt="MIT ライセンス"></a>
 </p>

@@ -13,7 +13,7 @@ This fork is maintained by [Tien Le (nhocconan)](https://github.com/nhocconan) f
 </p>
 
 <p align="center">
-  <a href="https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/releases"><img src="https://img.shields.io/github/v/release/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH?color=F97316" alt="Latest release"></a>
+  <a href="README.md#1-install"><img src="https://img.shields.io/badge/install-build_from_source-blue" alt="Install from source"></a>
   <a href="https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/actions/workflows/ci.yml"><img src="https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-18181B.svg" alt="MIT license"></a>
 </p>
@@ -129,6 +129,10 @@ Choose one selector per setup. With no selector, cc-clip configures Claude Code.
 | opencode | `cc-clip setup myserver --opencode` | Yes | Yes | `xclip` or `wl-paste` |
 | Antigravity | `cc-clip setup myserver --agy` | No | Yes | Notification integration only |
 | Cursor CLI | `cc-clip setup myserver --cursor` | Yes | Yes | `DISPLAY` or `WAYLAND_DISPLAY` set in Cursor's shell |
+
+Antigravity CLI itself [supports image attachments](https://antigravity.google/docs/cli/prompting),
+but cc-clip currently installs only its notification hook. `--agy` does not set up
+remote image paste; that clipboard path still needs implementation and verification.
 
 For Codex targets, cc-clip tries to install Xvfb with `apt` or `dnf`. If
 passwordless `sudo` is unavailable, it stops and prints the exact install command;
