@@ -1,4 +1,4 @@
-<!-- i18n-source: README.md @ 9dbae7eedc63dda74f241fa1e380bf6c11f4bcd5 -->
+<!-- i18n-source: README.md @ 7fdeff5f8453fe8c74125f3dead11c710941ab15 -->
 
 > Personal fork of [ShunmeiCho/cc-clip](https://github.com/ShunmeiCho/cc-clip), maintained by nhocconan. See the [installation instructions](README.md#1-install).
 
