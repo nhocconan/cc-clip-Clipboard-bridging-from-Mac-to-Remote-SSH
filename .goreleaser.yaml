@@ -31,8 +31,8 @@ checksum:
 
 release:
   github:
-    owner: ShunmeiCho
-    name: cc-clip
+    owner: nhocconan
+    name: cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH
   draft: false
   prerelease: auto
 

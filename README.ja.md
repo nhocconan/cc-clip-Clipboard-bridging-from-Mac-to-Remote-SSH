@@ -1,3 +1,5 @@
+> Personal fork of [ShunmeiCho/cc-clip](https://github.com/ShunmeiCho/cc-clip), maintained by nhocconan. No fork release is published yet; use the [source installation instructions](README.md#1-install).
+
 <!-- i18n-source: README.md @ cb54b21c535ed03bd3d0a62a3b48a966637d2d9f -->
 
 <p align="center">
@@ -13,8 +15,8 @@
 > これは英語版の日本語訳です。内容に差異がある場合は [English 原文](README.md) を正とします。この翻訳は英語版のメインラインより遅れている場合があります。
 
 <p align="center">
-  <a href="https://github.com/ShunmeiCho/cc-clip/releases"><img src="https://img.shields.io/github/v/release/ShunmeiCho/cc-clip?color=F97316" alt="最新リリース"></a>
-  <a href="https://github.com/ShunmeiCho/cc-clip/actions/workflows/ci.yml"><img src="https://github.com/ShunmeiCho/cc-clip/actions/workflows/ci.yml/badge.svg" alt="CI ステータス"></a>
+  <a href="https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/releases"><img src="https://img.shields.io/github/v/release/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH?color=F97316" alt="最新リリース"></a>
+  <a href="https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/actions/workflows/ci.yml"><img src="https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/actions/workflows/ci.yml/badge.svg" alt="CI ステータス"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-18181B.svg" alt="MIT ライセンス"></a>
 </p>
 
@@ -53,7 +55,11 @@
 ### 1. インストール
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ShunmeiCho/cc-clip/main/scripts/install.sh | sh
+git clone https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH.git
+cd cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH
+make build
+mkdir -p "$HOME/.local/bin"
+cp cc-clip "$HOME/.local/bin/cc-clip"
 cc-clip --version
 ```
 
@@ -129,7 +135,7 @@ asdf のインストールも見つかります）、バージョンとハッシ
 
 > opencode と Antigravity の統合生成はテストでカバーされていますが、代表的なマシンでの
 > ホストイベント配信はまだ smoke test されていません。
-> 結果を [報告してください](https://github.com/ShunmeiCho/cc-clip/issues)。
+> 結果を [報告してください](https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/issues)。
 >
 > Kimi Code と MastraCode は shim がインターセプトする `wl-paste` / `xclip` 呼び出しで
 > クリップボードを読み取るため、デフォルトのターゲットで画像の貼り付けが動作するはずです。
@@ -470,13 +476,13 @@ cc-clip doctor --host myserver
 ## コントリビュート
 
 bug report と焦点を絞った pull request を歓迎します。大きな機能については、最初に
-[issue](https://github.com/ShunmeiCho/cc-clip/issues)を開き、進め方を議論してください。
+[issue](https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/issues)を開き、進め方を議論してください。
 
 source から build するには、`go.mod` に宣言された Go version が必要です。
 
 ```bash
-git clone https://github.com/ShunmeiCho/cc-clip.git
-cd cc-clip
+git clone https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH.git
+cd cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH
 make build
 make test
 ```

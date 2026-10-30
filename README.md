@@ -1,3 +1,7 @@
+# cc-clip — personal fork
+
+This fork is maintained by [Tien Le (nhocconan)](https://github.com/nhocconan) for personal use, with fixes and updates based on [ShunmeiCho/cc-clip](https://github.com/ShunmeiCho/cc-clip). Credit for the original project belongs to its authors.
+
 <p align="center">
   <b>English</b> ·
   <a href="README.zh-CN.md">简体中文</a> ·
@@ -9,8 +13,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/ShunmeiCho/cc-clip/releases"><img src="https://img.shields.io/github/v/release/ShunmeiCho/cc-clip?color=F97316" alt="Latest release"></a>
-  <a href="https://github.com/ShunmeiCho/cc-clip/actions/workflows/ci.yml"><img src="https://github.com/ShunmeiCho/cc-clip/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
+  <a href="https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/releases"><img src="https://img.shields.io/github/v/release/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH?color=F97316" alt="Latest release"></a>
+  <a href="https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/actions/workflows/ci.yml"><img src="https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-18181B.svg" alt="MIT license"></a>
 </p>
 
@@ -48,12 +52,30 @@ This is the stable macOS-to-Linux path. You need:
 
 ### 1. Install
 
+This fork does not have a published release yet. Install from source using the
+Go version declared in `go.mod`:
+
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ShunmeiCho/cc-clip/main/scripts/install.sh | sh
+git clone https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH.git
+cd cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH
+make build
+mkdir -p "$HOME/.local/bin"
+cp cc-clip "$HOME/.local/bin/cc-clip"
 cc-clip --version
 ```
 
-If the installer asks, add `~/.local/bin` to your `PATH` before continuing.
+Once this fork publishes a release, you can use its installer:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/main/scripts/install.sh | sh
+```
+
+Until then, update with `git pull`, `make build`, and the copy command above.
+Run `cc-clip service install` after replacing a binary used by the daemon. Keep
+this checkout available when deploying to Linux so `connect` can cross-compile
+if no release binary is available.
+
+Ensure `~/.local/bin` is on your `PATH` before continuing.
 
 ### 2. Set up one host
 
@@ -81,6 +103,19 @@ Copy an image to the Mac clipboard, then run locally:
 ```bash
 cc-clip doctor --host myserver
 ```
+
+### Multiple servers
+
+Each server can use the same default reverse forward:
+
+```sshconfig
+RemoteForward 18339 127.0.0.1:18339
+```
+
+The listener is on each remote server; all servers can connect to the same local
+daemon. Independent SSH connections to the same server cannot bind that remote
+port twice. Keep one connection responsible for the tunnel, and use
+`ssh -o ClearAllForwardings=yes myserver` for additional shells.
 
 ## Choose a Target
 
@@ -128,7 +163,7 @@ binaries. The flag cannot be combined with `--local-bin` in the same run.
 
 > opencode and Antigravity integration generation is covered by tests, but host
 > event delivery has not yet been smoke-tested on a representative machine.
-> Please [report what you find](https://github.com/ShunmeiCho/cc-clip/issues).
+> Please [report what you find](https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/issues).
 >
 > Kimi Code and MastraCode read the clipboard through `wl-paste` / `xclip`
 > invocations the shim intercepts, so image paste should work with the default
@@ -489,14 +524,14 @@ Use a simpler option when it fits:
 ## Contributing
 
 Bug reports and focused pull requests are welcome. For larger features, open an
-[issue](https://github.com/ShunmeiCho/cc-clip/issues) first so the approach can
+[issue](https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/issues) first so the approach can
 be discussed.
 
 Building from source requires the Go version declared in `go.mod`:
 
 ```bash
-git clone https://github.com/ShunmeiCho/cc-clip.git
-cd cc-clip
+git clone https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH.git
+cd cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH
 make build
 make test
 ```

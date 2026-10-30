@@ -960,7 +960,7 @@ func prepareBinaryLocal(host, remoteOS, remoteArch string) (localBin string, err
 			"cannot obtain cc-clip for %s/%s:\n"+
 				"  - GitHub release download failed: %v\n"+
 				"  - Cross-compile unavailable: Go toolchain not found\n"+
-				"  Fix: download the correct binary from https://github.com/ShunmeiCho/cc-clip/releases\n"+
+				"  Fix: download the correct binary from https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/releases\n"+
 				"       and re-run with: cc-clip connect %s --local-bin /path/to/cc-clip",
 			remoteOS, remoteArch, dlErr, host)
 	}
@@ -971,7 +971,7 @@ func prepareBinaryLocal(host, remoteOS, remoteArch string) (localBin string, err
 			"cannot obtain cc-clip for %s/%s:\n"+
 				"  - GitHub release download failed: %v\n"+
 				"  - Cross-compile unavailable: source directory not found\n"+
-				"  Fix: download the correct binary from https://github.com/ShunmeiCho/cc-clip/releases\n"+
+				"  Fix: download the correct binary from https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/releases\n"+
 				"       and re-run with: cc-clip connect %s --local-bin /path/to/cc-clip",
 			remoteOS, remoteArch, dlErr, host)
 	}
@@ -1095,7 +1095,7 @@ func downloadReleaseBinary(targetOS, targetArch string) (string, error) {
 	// e.g. "v0.3.0-1-g99b1298" → "0.3.0-1-g99b1298" → "0.3.0"
 	ver := releaseVersion(strings.TrimPrefix(version, "v"))
 	archiveName := fmt.Sprintf("cc-clip_%s_%s_%s.tar.gz", ver, targetOS, targetArch)
-	url := fmt.Sprintf("https://github.com/ShunmeiCho/cc-clip/releases/download/v%s/%s", ver, archiveName)
+	url := fmt.Sprintf("https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/releases/download/v%s/%s", ver, archiveName)
 
 	tmpDir, err := os.MkdirTemp("", "cc-clip-download-*")
 	if err != nil {
@@ -1113,7 +1113,7 @@ func downloadReleaseBinary(targetOS, targetArch string) (string, error) {
 	// extracting. This downloads a release binary and pushes it to a remote
 	// host, so an unverified archive is a supply-chain exposure. On any
 	// mismatch or missing entry, refuse to extract.
-	checksumsURL := fmt.Sprintf("https://github.com/ShunmeiCho/cc-clip/releases/download/v%s/checksums.txt", ver)
+	checksumsURL := fmt.Sprintf("https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/releases/download/v%s/checksums.txt", ver)
 	checksumsPath := filepath.Join(tmpDir, "checksums.txt")
 	csCmd := exec.Command("curl", releaseDownloadArgs(checksumsPath, checksumsURL)...)
 	if out, err := csCmd.CombinedOutput(); err != nil {

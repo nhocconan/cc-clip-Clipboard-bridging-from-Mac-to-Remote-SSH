@@ -1,3 +1,5 @@
+> Personal fork of [ShunmeiCho/cc-clip](https://github.com/ShunmeiCho/cc-clip), maintained by nhocconan. No fork release is published yet; use the [source installation instructions](README.md#1-install).
+
 <!-- i18n-source: README.md @ cb54b21c535ed03bd3d0a62a3b48a966637d2d9f -->
 
 <p align="center">
@@ -13,8 +15,8 @@
 > 本文是英文原文的简体中文翻译。若内容有差异，以 [English 原文](README.md) 为准。翻译版本可能晚于英文主线更新。
 
 <p align="center">
-  <a href="https://github.com/ShunmeiCho/cc-clip/releases"><img src="https://img.shields.io/github/v/release/ShunmeiCho/cc-clip?color=F97316" alt="最新版本"></a>
-  <a href="https://github.com/ShunmeiCho/cc-clip/actions/workflows/ci.yml"><img src="https://github.com/ShunmeiCho/cc-clip/actions/workflows/ci.yml/badge.svg" alt="CI 状态"></a>
+  <a href="https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/releases"><img src="https://img.shields.io/github/v/release/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH?color=F97316" alt="最新版本"></a>
+  <a href="https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/actions/workflows/ci.yml"><img src="https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/actions/workflows/ci.yml/badge.svg" alt="CI 状态"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-18181B.svg" alt="MIT 许可证"></a>
 </p>
 
@@ -53,7 +55,11 @@
 ### 1. 安装
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ShunmeiCho/cc-clip/main/scripts/install.sh | sh
+git clone https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH.git
+cd cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH
+make build
+mkdir -p "$HOME/.local/bin"
+cp cc-clip "$HOME/.local/bin/cc-clip"
 cc-clip --version
 ```
 
@@ -127,7 +133,7 @@ hook 会被保留。
 
 > opencode 和 Antigravity 的集成生成已有测试覆盖，但尚未在代表性主机上
 > 对事件交付进行冒烟测试。请
-> [报告测试结果](https://github.com/ShunmeiCho/cc-clip/issues)。
+> [报告测试结果](https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/issues)。
 >
 > Kimi Code 和 MastraCode 通过 shim 会拦截的 `wl-paste` / `xclip` 调用读取
 > 剪贴板，因此使用默认目标即可粘贴图片。这一点已通过对照其源码的静态核对和
@@ -460,13 +466,13 @@ cc-clip doctor --host myserver
 ## 贡献
 
 欢迎提交 bug 报告和范围明确的 pull request。对于较大的功能，请先创建
-[issue](https://github.com/ShunmeiCho/cc-clip/issues)，以便讨论实现方案。
+[issue](https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/issues)，以便讨论实现方案。
 
 从源代码构建需要使用 `go.mod` 中声明的 Go 版本：
 
 ```bash
-git clone https://github.com/ShunmeiCho/cc-clip.git
-cd cc-clip
+git clone https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH.git
+cd cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH
 make build
 make test
 ```

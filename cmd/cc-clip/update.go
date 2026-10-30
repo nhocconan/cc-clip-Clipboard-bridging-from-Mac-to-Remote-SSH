@@ -27,7 +27,7 @@ import (
 )
 
 const (
-	updateRepo          = "ShunmeiCho/cc-clip"
+	updateRepo          = "nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH"
 	updateAPIURL        = "https://api.github.com/repos/" + updateRepo + "/releases"
 	updateDownloadBase  = "https://github.com/" + updateRepo + "/releases/download"
 	updateLatestPage    = "https://github.com/" + updateRepo + "/releases/latest"
