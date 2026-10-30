@@ -313,7 +313,7 @@ func cmdPaste() {
 	}
 
 	probeTimeout := envDuration("CC_CLIP_PROBE_TIMEOUT_MS", 500*time.Millisecond)
-	fetchTimeout := envDuration("CC_CLIP_FETCH_TIMEOUT_MS", 5*time.Second)
+	fetchTimeout := envDuration("CC_CLIP_FETCH_TIMEOUT_MS", 15*time.Second)
 
 	if err := tunnel.Probe(fmt.Sprintf("127.0.0.1:%d", port), probeTimeout); err != nil {
 		fmt.Fprintf(os.Stderr, "cc-clip: tunnel unreachable: %v\n", err)

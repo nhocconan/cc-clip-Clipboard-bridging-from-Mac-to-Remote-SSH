@@ -851,7 +851,7 @@ func connectSuccessSummary(t DeployTargets, noNotify bool) string {
 // fallback into a guaranteed failure for every other consumer.
 //
 // The timeout note exists because Cursor kills each clipboard child after ~4s
-// while the shim's default fetch timeout is 5s — a large image over a slow
+// while the shim's default fetch timeout is 15s — a large image over a slow
 // tunnel would be killed mid-transfer without the override.
 const cursorDisplayNotice = `      Cursor CLI notes:
       1. Cursor only reads the clipboard when DISPLAY or WAYLAND_DISPLAY is set
@@ -859,7 +859,7 @@ const cursorDisplayNotice = `      Cursor CLI notes:
          If empty, connect with 'ssh -X <host>' or export an existing display.
          cc-clip does not set one for you.
       2. Cursor stops waiting for clipboard helpers after about 4 seconds; the
-         shim's default fetch timeout is 5. For large images over a slow link,
+         shim's default fetch timeout is 15. For large images over a slow link,
          add to your remote shell rc:  export CC_CLIP_FETCH_TIMEOUT_MS=3000`
 
 // maybePrintCursorNotice writes cursorDisplayNotice to out when the Cursor
