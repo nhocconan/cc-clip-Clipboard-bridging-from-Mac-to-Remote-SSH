@@ -13,7 +13,7 @@ This fork is maintained by [Tien Le (nhocconan)](https://github.com/nhocconan) f
 </p>
 
 <p align="center">
-  <a href="README.md#1-install"><img src="https://img.shields.io/badge/install-build_from_source-blue" alt="Install from source"></a>
+  <a href="https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/releases"><img src="https://img.shields.io/github/v/release/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH?color=F97316" alt="Latest release"></a>
   <a href="https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/actions/workflows/ci.yml"><img src="https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-18181B.svg" alt="MIT license"></a>
 </p>
@@ -52,33 +52,12 @@ This is the stable macOS-to-Linux path. You need:
 
 ### 1. Install
 
-This fork does not have a published release yet. Install from source using the
-Go version declared in `go.mod`:
-
 ```bash
-git clone https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH.git
-cd cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH
-make build
-mkdir -p "$HOME/.local/bin"
-cp cc-clip "$HOME/.local/bin/cc-clip"
+curl -fsSL https://raw.githubusercontent.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/main/scripts/install.sh | sh
 cc-clip --version
 ```
 
-Once this fork publishes a release, you can use its installer:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/main/scripts/install.sh | sh
-```
-
-Until then, update with `git pull`, `make build`, and the copy command above.
-On macOS, restart an already installed daemon after replacing its binary:
-
-```bash
-launchctl kickstart -k "gui/$(id -u)/com.cc-clip.daemon"
-```
-
-Keep this checkout available when deploying to Linux so `connect` can
-cross-compile if no release binary is available.
+Update an existing installation with `cc-clip update`.
 
 Ensure `~/.local/bin` is on your `PATH` before continuing.
 

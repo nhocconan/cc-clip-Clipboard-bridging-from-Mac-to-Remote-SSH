@@ -4,13 +4,13 @@ $ProgressPreference = "SilentlyContinue"
 
 # cc-clip Windows installer
 # Usage:
-#   irm https://raw.githubusercontent.com/ShunmeiCho/cc-clip/main/scripts/install.ps1 | iex
+#   irm https://raw.githubusercontent.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/main/scripts/install.ps1 | iex
 #
 # Optional environment overrides:
 #   $env:CC_CLIP_VERSION = "v0.9.0"          # pin a release tag
 #   $env:CC_CLIP_INSTALL_DIR = "$HOME\bin"   # install location
 
-$Repo = "ShunmeiCho/cc-clip"
+$Repo = "nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH"
 $InstallDir = if ($env:CC_CLIP_INSTALL_DIR) { $env:CC_CLIP_INSTALL_DIR } else { Join-Path $HOME ".local\bin" }
 
 function Get-CcClipArch {

@@ -1,6 +1,8 @@
-> Personal fork of [ShunmeiCho/cc-clip](https://github.com/ShunmeiCho/cc-clip), maintained by nhocconan. No fork release is published yet; use the [source installation instructions](README.md#1-install).
+<!-- i18n-source: README.md @ 9dbae7eedc63dda74f241fa1e380bf6c11f4bcd5 -->
 
-<!-- i18n-source: README.md @ cb54b21c535ed03bd3d0a62a3b48a966637d2d9f -->
+> Personal fork of [ShunmeiCho/cc-clip](https://github.com/ShunmeiCho/cc-clip), maintained by nhocconan. See the [installation instructions](README.md#1-install).
+
+使用下方的一行命令安装，运行 `cc-clip update` 更新。多个服务器可分别使用 `RemoteForward 18339 127.0.0.1:18339`，但同一服务器上的独立 SSH 连接不能重复监听该端口；额外终端请使用 `ssh -o ClearAllForwardings=yes myserver`。
 
 <p align="center">
   <a href="README.md">English</a> ·
@@ -15,7 +17,7 @@
 > 本文是英文原文的简体中文翻译。若内容有差异，以 [English 原文](README.md) 为准。翻译版本可能晚于英文主线更新。
 
 <p align="center">
-  <a href="README.md#1-install"><img src="https://img.shields.io/badge/install-build_from_source-blue" alt="Install from source"></a>
+  <a href="https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/releases"><img src="https://img.shields.io/github/v/release/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH?color=F97316" alt="Latest release"></a>
   <a href="https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/actions/workflows/ci.yml"><img src="https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/actions/workflows/ci.yml/badge.svg" alt="CI 状态"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-18181B.svg" alt="MIT 许可证"></a>
 </p>
@@ -55,11 +57,7 @@
 ### 1. 安装
 
 ```bash
-git clone https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH.git
-cd cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH
-make build
-mkdir -p "$HOME/.local/bin"
-cp cc-clip "$HOME/.local/bin/cc-clip"
+curl -fsSL https://raw.githubusercontent.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/main/scripts/install.sh | sh
 cc-clip --version
 ```
 
@@ -102,8 +100,10 @@ cc-clip doctor --host myserver
 | 仅 Codex CLI | `cc-clip setup myserver --codex` | 是 | 是 | Xvfb；设置过程可能需要远程 `sudo` |
 | 所有集成 | `cc-clip setup myserver --all` | 是 | 是 | Codex 需要 Xvfb |
 | opencode | `cc-clip setup myserver --opencode` | 是 | 是 | `xclip` 或 `wl-paste` |
-| Antigravity | `cc-clip setup myserver --agy` | 否 | 是 | 仅通知集成 |
+| Antigravity | `cc-clip setup myserver --agy` | 是 | 是 | agy 1.4.10；`xclip` 或 `wl-paste` shim |
 | Cursor CLI | `cc-clip setup myserver --cursor` | 是 | 是 | Cursor 所在 shell 中需已设置 `DISPLAY` 或 `WAYLAND_DISPLAY` |
+
+Antigravity 图片粘贴已在 Linux 的 agy 1.4.10 上验证。先在远程运行 `agy update`，再运行本地的 `cc-clip connect myserver --agy`。`--no-notify` 只关闭通知，不影响图片粘贴。在无图形桌面的 X11 主机上使用 `DISPLAY=:0 agy`；shim 通过 SSH 获取图片，因此无需真实 X server。确保 `~/.local/bin` 在 PATH 中优先于 `/usr/bin`。Wayland 会话需要在远程安装 `cc-clip install --target wl-paste`。此集成仅转发图片，不转发视频。
 
 对于 Codex 目标，cc-clip 会尝试使用 `apt` 或 `dnf` 安装 Xvfb。如果
 无法使用免密码 `sudo`，它会停止并输出准确的安装命令；

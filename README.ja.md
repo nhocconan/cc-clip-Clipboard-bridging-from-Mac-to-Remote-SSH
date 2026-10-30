@@ -1,6 +1,8 @@
-> Personal fork of [ShunmeiCho/cc-clip](https://github.com/ShunmeiCho/cc-clip), maintained by nhocconan. No fork release is published yet; use the [source installation instructions](README.md#1-install).
+<!-- i18n-source: README.md @ 9dbae7eedc63dda74f241fa1e380bf6c11f4bcd5 -->
 
-<!-- i18n-source: README.md @ cb54b21c535ed03bd3d0a62a3b48a966637d2d9f -->
+> Personal fork of [ShunmeiCho/cc-clip](https://github.com/ShunmeiCho/cc-clip), maintained by nhocconan. See the [installation instructions](README.md#1-install).
+
+以下の一行コマンドでインストールし、`cc-clip update` で更新できます。異なるサーバーではそれぞれ `RemoteForward 18339 127.0.0.1:18339` を使えます。同じサーバーへの独立した SSH 接続は同じポートを重複して開けないため、追加のシェルには `ssh -o ClearAllForwardings=yes myserver` を使ってください。
 
 <p align="center">
   <a href="README.md">English</a> ·
@@ -15,7 +17,7 @@
 > これは英語版の日本語訳です。内容に差異がある場合は [English 原文](README.md) を正とします。この翻訳は英語版のメインラインより遅れている場合があります。
 
 <p align="center">
-  <a href="README.md#1-install"><img src="https://img.shields.io/badge/install-build_from_source-blue" alt="Install from source"></a>
+  <a href="https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/releases"><img src="https://img.shields.io/github/v/release/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH?color=F97316" alt="Latest release"></a>
   <a href="https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/actions/workflows/ci.yml"><img src="https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/actions/workflows/ci.yml/badge.svg" alt="CI ステータス"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-18181B.svg" alt="MIT ライセンス"></a>
 </p>
@@ -55,11 +57,7 @@
 ### 1. インストール
 
 ```bash
-git clone https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH.git
-cd cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH
-make build
-mkdir -p "$HOME/.local/bin"
-cp cc-clip "$HOME/.local/bin/cc-clip"
+curl -fsSL https://raw.githubusercontent.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/main/scripts/install.sh | sh
 cc-clip --version
 ```
 
@@ -102,8 +100,10 @@ cc-clip doctor --host myserver
 | Codex CLI のみ | `cc-clip setup myserver --codex` | はい | はい | Xvfb。セットアップにリモートの `sudo` が必要な場合があります |
 | すべての統合 | `cc-clip setup myserver --all` | はい | はい | Codex には Xvfb |
 | opencode | `cc-clip setup myserver --opencode` | はい | はい | `xclip` または `wl-paste` |
-| Antigravity | `cc-clip setup myserver --agy` | いいえ | はい | 通知統合のみ |
+| Antigravity | `cc-clip setup myserver --agy` | はい | はい | agy 1.4.10、`xclip` または `wl-paste` shim |
 | Cursor CLI | `cc-clip setup myserver --cursor` | はい | はい | Cursor を実行する shell に `DISPLAY` または `WAYLAND_DISPLAY` が設定されていること |
+
+Antigravity の画像貼り付けは Linux の agy 1.4.10 で検証済みです。リモートで `agy update` を実行してから、ローカルで `cc-clip connect myserver --agy` を実行します。`--no-notify` でも画像貼り付けは有効です。ヘッドレス X11 ホストでは `DISPLAY=:0 agy` で起動します。shim が SSH 経由で画像を取得するため、実際の X server は不要です。PATH では `~/.local/bin` を `/usr/bin` より前に置いてください。Wayland セッションではリモートで `cc-clip install --target wl-paste` を実行します。動画の転送には対応していません。
 
 Codex ターゲットでは、cc-clip は `apt` または `dnf` を使って Xvfb のインストールを試みます。
 passwordless `sudo` が使えない場合は停止し、正確なインストールコマンドを表示します。
