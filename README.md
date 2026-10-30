@@ -71,9 +71,14 @@ curl -fsSL https://raw.githubusercontent.com/nhocconan/cc-clip-Clipboard-bridgin
 ```
 
 Until then, update with `git pull`, `make build`, and the copy command above.
-Run `cc-clip service install` after replacing a binary used by the daemon. Keep
-this checkout available when deploying to Linux so `connect` can cross-compile
-if no release binary is available.
+On macOS, restart an already installed daemon after replacing its binary:
+
+```bash
+launchctl kickstart -k "gui/$(id -u)/com.cc-clip.daemon"
+```
+
+Keep this checkout available when deploying to Linux so `connect` can
+cross-compile if no release binary is available.
 
 Ensure `~/.local/bin` is on your `PATH` before continuing.
 
@@ -127,18 +132,30 @@ Choose one selector per setup. With no selector, cc-clip configures Claude Code.
 | Codex CLI only | `cc-clip setup myserver --codex` | Yes | Yes | Xvfb; setup may need remote `sudo` |
 | All integrations | `cc-clip setup myserver --all` | Yes | Yes | Xvfb for Codex |
 | opencode | `cc-clip setup myserver --opencode` | Yes | Yes | `xclip` or `wl-paste` |
-| Antigravity | `cc-clip setup myserver --agy` | No | Yes | Notification integration only |
+| Antigravity | `cc-clip setup myserver --agy` | Yes | Yes | agy 1.4.10; `xclip` or `wl-paste` shim |
 | Cursor CLI | `cc-clip setup myserver --cursor` | Yes | Yes | `DISPLAY` or `WAYLAND_DISPLAY` set in Cursor's shell |
 
-Antigravity CLI itself [supports image attachments](https://antigravity.google/docs/cli/prompting),
-but cc-clip currently installs only its notification hook. `--agy` does not set up
-remote image paste; that clipboard path still needs implementation and verification.
+Antigravity image paste is verified with agy 1.4.10 on Linux. Upgrade agy on
+the remote with `agy update`, then deploy with `cc-clip connect myserver --agy`.
+`--no-notify` skips notification hooks while keeping image paste enabled.
+
+On a headless X11 host, start the CLI with:
+
+```bash
+DISPLAY=:0 agy
+```
+
+agy requires a display variable before it calls `xclip`. The cc-clip shim reads
+images through the SSH tunnel, so this invocation does not require an X server.
+Keep `~/.local/bin` ahead of `/usr/bin` in `PATH`. In a Wayland session, install
+the wl-paste shim instead (`cc-clip install --target wl-paste` on the remote).
+This integration forwards images, not agy's video attachments.
 
 For Codex targets, cc-clip tries to install Xvfb with `apt` or `dnf`. If
 passwordless `sudo` is unavailable, it stops and prints the exact install command;
 run that command manually, then repeat setup.
 
-The Claude, opencode, and Cursor paths use the remote `xclip` or `wl-paste`
+The Claude, opencode, Antigravity, and Cursor paths use the remote `xclip` or `wl-paste`
 shim. Codex reads X11 directly, so its target adds Xvfb and `cc-clip x11-bridge`
 instead.
 

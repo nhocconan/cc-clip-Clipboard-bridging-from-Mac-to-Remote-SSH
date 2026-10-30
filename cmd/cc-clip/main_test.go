@@ -430,7 +430,7 @@ func TestConnectSuccessSummary(t *testing.T) {
 		{"all mentions Claude Code (codex line printed separately)", DeployTargets{Claude: true, Codex: true, Opencode: true, Antigravity: true, Cursor: true}, false, "remote Claude Code"},
 		{"opencode mentions opencode", DeployTargets{Opencode: true}, false, "remote opencode"},
 		{"pure codex does not claim the Claude shim", DeployTargets{Codex: true}, false, "Codex CLI clipboard support"},
-		{"agy mentions notifications + pending clipboard", DeployTargets{Antigravity: true}, false, "Antigravity notifications configured"},
+		{"agy mentions image paste", DeployTargets{Antigravity: true}, false, "Ctrl+V in remote Antigravity"},
 		{"agy no-notify reports notifications skipped", DeployTargets{Antigravity: true}, true, "notifications skipped (--no-notify)"},
 		{"cursor mentions Cursor and the DISPLAY prerequisite", DeployTargets{Cursor: true}, false, "DISPLAY"},
 	}
@@ -444,6 +444,9 @@ func TestConnectSuccessSummary(t *testing.T) {
 			}
 			if !tt.targets.Claude && strings.Contains(got, "Claude Code") {
 				t.Fatalf("non-Claude target must not claim Claude Code: %q", got)
+			}
+			if tt.targets.Antigravity && !tt.targets.Claude && !tt.targets.Codex && !strings.Contains(got, "Ctrl+V") {
+				t.Fatalf("Antigravity must report image paste even without notifications: %q", got)
 			}
 			if tt.noNotify && strings.Contains(got, "notifications configured") {
 				t.Fatalf("--no-notify summary must not claim notifications were configured: %q", got)

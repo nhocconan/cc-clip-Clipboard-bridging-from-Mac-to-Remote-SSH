@@ -479,11 +479,7 @@ remote has a valid claude binary installed.
 		}
 	}
 
-	// Step 5: Install shim — only for targets that use the clipboard shim
-	// (Claude / opencode). Pure --codex / --agy read X11 directly or are
-	// notify-only and need no shim, so install is SKIPPED; an existing shim is
-	// NEVER uninstalled here (design §3 + Option A: --codex no longer installs
-	// the Claude shim, but must not remove one a prior run left behind).
+	// Step 5: Install the shared clipboard shim for selected terminal readers.
 	var installOut string
 	var needsShim bool
 	if shimTargeted(opts.targets) {
@@ -836,9 +832,9 @@ func connectSuccessSummary(t DeployTargets, noNotify bool) string {
 		return "Setup complete. Codex CLI clipboard support is configured below."
 	case t.Antigravity:
 		if noNotify {
-			return "Setup complete. Antigravity notifications skipped (--no-notify); clipboard transport is pending."
+			return "Setup complete. Ctrl+V in remote Antigravity will paste images once DISPLAY is set; notifications skipped (--no-notify)."
 		}
-		return "Setup complete. Antigravity notifications configured; clipboard transport is pending."
+		return "Setup complete. Ctrl+V in remote Antigravity will paste images once DISPLAY is set (see the note above)."
 	case t.Cursor:
 		return "Setup complete. Ctrl+V in remote Cursor will paste images once DISPLAY is set (see the note above)."
 	default:
@@ -872,6 +868,20 @@ func maybePrintCursorNotice(out io.Writer, t DeployTargets) {
 	if cursorTargeted(t) {
 		fmt.Fprintln(out)
 		fmt.Fprintln(out, cursorDisplayNotice)
+	}
+}
+
+const agyClipboardNotice = `      Antigravity image paste (tested with agy 1.4.10):
+      Use 'agy update' on the remote if paste reports an unsupported terminal.
+      Keep ~/.local/bin ahead of /usr/bin in PATH so agy finds the cc-clip shim.
+      On headless X11 hosts, launch with: DISPLAY=:0 agy
+      The shim serves the image through SSH; this does not require an X server.
+      A Wayland session instead needs the wl-paste shim installed.`
+
+func maybePrintAgyNotice(out io.Writer, t DeployTargets) {
+	if agyTargeted(t) {
+		fmt.Fprintln(out)
+		fmt.Fprintln(out, agyClipboardNotice)
 	}
 }
 
@@ -920,6 +930,7 @@ func connectVerifyTunnel(session *shim.SSHSession, port int, host string, target
 	// The DISPLAY prerequisite must precede the summary: the summary's Cursor
 	// line refers to "the note above".
 	maybePrintCursorNotice(os.Stdout, targets)
+	maybePrintAgyNotice(os.Stdout, targets)
 
 	fmt.Println()
 	fmt.Println(connectSuccessSummary(targets, noNotify))

@@ -109,9 +109,9 @@ const targetMenu = `Select deployment target:
   1) claude       clipboard shim + claude-notify
   2) codex        X11 bridge + codex-notify
   3) opencode     clipboard shim + opencode-notify
-  4) agy          Antigravity (agy-notify plugin; clipboard transport pending)
+  4) agy          Antigravity (clipboard shim + agy-notify plugin)
   5) cursor       clipboard shim (requires DISPLAY in Cursor's shell; no notifications yet)
-  6) all          everything above (Antigravity clipboard excluded until resolved)
+  6) all          everything above
 `
 
 // maxMenuAttempts bounds invalid-input re-prompts so a misbehaving stream cannot
@@ -281,12 +281,11 @@ func claudeTargeted(t DeployTargets) bool { return t.Claude }
 // codex-notify in ~/.codex/config.toml) is selected.
 func codexTargeted(t DeployTargets) bool { return t.Codex }
 
-// shimTargeted reports whether this run should install the clipboard shim. The
-// xclip/wl-paste shim serves Claude Code, opencode AND Cursor (all terminal
-// tools that shell out to the real binary); Codex reads X11 directly and agy is
-// notify-only, so neither needs the shim. A run that does not target the shim
-// SKIPS install but must never uninstall an existing shim (design §3 + Option A).
-func shimTargeted(t DeployTargets) bool { return t.Claude || t.Opencode || t.Cursor }
+// shimTargeted gates the xclip/wl-paste shim shared by terminal clipboard readers.
+// Codex reads X11 directly and uses its own bridge.
+func shimTargeted(t DeployTargets) bool {
+	return t.Claude || t.Opencode || t.Cursor || t.Antigravity
+}
 
 // cursorTargeted reports whether the Cursor CLI integration is selected. Cursor
 // is shim-only: its clipboard reader shells out to `xclip -selection clipboard
@@ -302,10 +301,7 @@ func shimTargeted(t DeployTargets) bool { return t.Claude || t.Opencode || t.Cur
 // this one predicate serves both.
 func cursorTargeted(t DeployTargets) bool { return t.Cursor }
 
-// agyTargeted reports whether the Antigravity (agy CLI) integration is selected.
-// agy is notify-only: it installs a bundled agy plugin whose Stop hook runs
-// `cc-clip plugin run agy-notify`. It needs neither the clipboard shim nor X11
-// (clipboard transport is deferred), so it is gated independently of shimTargeted.
+// agyTargeted gates the Antigravity clipboard prerequisites and notification plugin.
 func agyTargeted(t DeployTargets) bool { return t.Antigravity }
 
 // opencodeNotifyTargeted gates ONLY the opencode notify plugin. opencode's

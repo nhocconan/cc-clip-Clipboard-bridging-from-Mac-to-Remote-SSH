@@ -13,8 +13,8 @@ import (
 
 // TestTargetMembership verifies the per-target membership predicates that gate
 // 5.3c's per-phase side effects: Claude is targeted iff t.Claude; Codex iff
-// t.Codex; the clipboard shim is targeted iff Claude OR Opencode (Codex uses
-// X11 directly, agy uses notify only — neither needs the shim). --all sets all
+// t.Codex; the clipboard shim is targeted iff Claude, Opencode, Cursor or Antigravity (Codex uses
+// X11 directly and needs no shim). --all sets all
 // fields, so it is targeted on every axis.
 func TestTargetMembership(t *testing.T) {
 	t.Parallel()
@@ -26,7 +26,7 @@ func TestTargetMembership(t *testing.T) {
 		{"claude only", DeployTargets{Claude: true}, true, false, true, false, false},
 		{"codex only", DeployTargets{Codex: true}, false, true, false, false, false},
 		{"opencode only", DeployTargets{Opencode: true}, false, false, true, false, false},
-		{"agy only", DeployTargets{Antigravity: true}, false, false, false, true, false},
+		{"agy only", DeployTargets{Antigravity: true}, false, false, true, true, false},
 		// Cursor rides the same xclip/wl-paste shim as Claude/opencode, and its
 		// own predicate gates both that shim and the hooks.json notify hook.
 		{"cursor only", DeployTargets{Cursor: true}, false, false, true, false, true},

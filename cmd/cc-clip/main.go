@@ -120,7 +120,7 @@ Deployment targets (connect/setup; choose at most one selector):
     --claude         Claude Code: clipboard shim + claude-notify (default)
     --codex          Codex CLI ONLY: Xvfb + x11-bridge + codex-notify (no Claude shim)
     --opencode       opencode: clipboard shim + session.idle notify plugin
-    --agy            Antigravity: agy-notify (alias --antigravity)
+    --agy            Antigravity: clipboard shim + agy-notify (alias --antigravity)
     --cursor         Cursor CLI: clipboard shim + cursor-notify (paste requires
                      DISPLAY or WAYLAND_DISPLAY in Cursor's shell)
     --all            Everything above

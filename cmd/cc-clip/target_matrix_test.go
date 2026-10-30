@@ -85,3 +85,20 @@ func TestLegacyCodexNotice(t *testing.T) {
 		}
 	})
 }
+
+func TestAgyClipboardNotice(t *testing.T) {
+	for _, targets := range []DeployTargets{{Antigravity: true}, {Claude: true, Antigravity: true}} {
+		var out bytes.Buffer
+		maybePrintAgyNotice(&out, targets)
+		for _, text := range []string{"1.4.10", "DISPLAY=:0 agy", "wl-paste"} {
+			if !strings.Contains(out.String(), text) {
+				t.Errorf("missing %q in notice: %s", text, out.String())
+			}
+		}
+	}
+	var out bytes.Buffer
+	maybePrintAgyNotice(&out, DeployTargets{Codex: true})
+	if out.Len() != 0 {
+		t.Fatalf("unselected agy printed a notice: %s", out.String())
+	}
+}
