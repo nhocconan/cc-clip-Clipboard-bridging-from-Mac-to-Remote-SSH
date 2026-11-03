@@ -101,6 +101,46 @@ curl -s http://127.0.0.1:18339/health
 
 ---
 
+## Reconnecting a Persistent Screen Session
+
+The repository includes `scripts/ssh-cc-clip.sh` for a foreground SSH connection
+with a persistent remote `screen` session:
+
+```bash
+mkdir -p ~/scripts
+cp scripts/ssh-cc-clip.sh ~/scripts/ssh-cc-clip.sh
+chmod +x ~/scripts/ssh-cc-clip.sh
+~/scripts/ssh-cc-clip.sh myserver                  # screen: claude-myserver
+~/scripts/ssh-cc-clip.sh myserver my-screen-name
+```
+
+It reads the host's numeric `RemoteForward` listen port from SSH config. When
+that port is free, the screen connection owns the forward. If a cc-clip health
+check already answers there, it attaches with `ClearAllForwardings=yes` to
+reuse the existing tunnel. That existing connection must stay open for paste
+to keep working. The health check identifies the service, not which local
+installation owns it; use `cc-clip tunnel run` for authenticated identity checks.
+
+SSH transport failures retry after three seconds and probe the port again.
+A normal screen detach or exit ends the wrapper. Closing the terminal stops
+its SSH child and retry loop; the remote screen remains available for reattach.
+A lock prevents two wrappers on this machine from fighting over the same host
+and port. Host aliases for the same server have separate locks.
+
+An occupied but unresponsive port stops with `cc-clip doctor` guidance. The
+wrapper never kills remote sessions automatically. Follow the stale-session
+diagnosis above before ending a holder, especially if another computer also
+connects to this server.
+
+Older custom wrappers that print `Releasing a stale reverse forward` can hide
+cleanup failures: `sudo -n` requires passwordless sudo, and a parser matching
+only `sshd` misses newer OpenSSH's `sshd-session` process name. An inner
+`autossh` retry loop also bypasses cleanup between attempts and can survive
+its original terminal. Replace those wrappers with the repository version;
+rebuilding the cc-clip binary alone does not update a script in `~/scripts`.
+
+---
+
 ## Auto-Starting the Daemon with SSH LocalCommand
 
 If you skip the launchd service (`cc-clip service install`) and keep forgetting
