@@ -386,7 +386,9 @@ func TestRunCodexNotifyParsesAndPosts(t *testing.T) {
 func TestRunAntigravityNotifyAlwaysWritesDecision(t *testing.T) {
 	port, srv := newNotifyServerWithChannel(t)
 
-	stdin := strings.NewReader(`{"terminationReason":"completed","fullyIdle":true}`)
+	// agy 1.5.4 added common hook metadata. It must not change Stop handling
+	// or leak workspace paths into the notification body.
+	stdin := strings.NewReader(`{"hookEventName":"Stop","cwd":"/private/workspace","toolCall":{"id":"call-1"},"terminationReason":"completed","fullyIdle":true}`)
 	var stdout strings.Builder
 	if err := Run(AdapterAntigravityNotify, port, stdin, &stdout); err != nil {
 		t.Fatalf("Run antigravity-notify returned error: %v", err)

@@ -204,7 +204,7 @@ gh release view "$V" --json assets --jq '.assets[].name'
 
 # 2. /releases/latest points at this version (install.sh resolves via latest)
 LATEST=$(curl -sL -o /dev/null -w "%{url_effective}" \
-  https://github.com/ShunmeiCho/cc-clip/releases/latest)
+  https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/releases/latest)
 case "$LATEST" in
   */tag/$V) echo "latest=$V ok" ;;
   *) echo "ERROR: latest=$LATEST" >&2; exit 1 ;;
@@ -212,7 +212,7 @@ esac
 
 # 3. Download + checksum + execute one archive end-to-end
 TMP=$(mktemp -d)
-gh release download "$V" --repo ShunmeiCho/cc-clip \
+gh release download "$V" --repo nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH \
   --pattern "cc-clip_${Vnum}_darwin_arm64.tar.gz" \
   --pattern "checksums.txt" \
   --dir "$TMP"

@@ -53,8 +53,10 @@ jobs:
           # install.sh must expect the same format with version stripped of v prefix
           # (-F is literal match: the pattern contains ${...} / . which are
           #  regex metacharacters — -F keeps this robust across grep flavors.)
+          # shellcheck disable=SC2016
           grep -Fq 'cc-clip_${VERSION#v}_${PLATFORM}.tar.gz' scripts/install.sh
           # Windows installer must expect the matching zip artifact.
+          # shellcheck disable=SC2016
           grep -Fq '$archiveName = "cc-clip_$($version.TrimStart("v"))_${platform}.zip"' scripts/install.ps1
           # goreleaser archives must default to tar.gz (darwin/linux); windows
           # uses the `formats: [zip]` override in the same block. Schema is the
@@ -85,7 +87,7 @@ jobs:
           if [ -n "$unformatted" ]; then
             echo "::error::These files are not gofmt-clean; run gofmt -w on them:"
             echo "$unformatted"
-            gofmt -d $unformatted
+            gofmt -d .
             exit 1
           fi
 
@@ -117,6 +119,21 @@ jobs:
             GOOS="${target%/*}" GOARCH="${target#*/}" go build ./...
             GOOS="${target%/*}" GOARCH="${target#*/}" go vet ./...
           done
+
+  test-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
+        with:
+          go-version-file: go.mod
+
+      # Cross-compilation cannot exercise pbcopy/pbpaste or other Darwin-only
+      # behavior. The clipboard tests substitute tools and preserve the runner's
+      # real clipboard.
+      - name: Test (race)
+        run: go test ./... -race -count=1
 
   # Runs the //go:build windows tests, which no other job can even compile.
   # Separate from `test` because it needs a Windows runner, and kept to the

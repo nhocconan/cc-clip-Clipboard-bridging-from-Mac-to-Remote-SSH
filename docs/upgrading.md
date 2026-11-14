@@ -3,21 +3,27 @@
 This page is for **users** of `cc-clip`. If you want to cut a new release,
 see [release.md](release.md).
 
+These instructions install the maintained fork,
+[nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH](https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH).
+Its published releases start at v0.13.2. Earlier migration notes below describe
+inherited behavior; use the original upstream repository if you need an older
+release that this fork has not published.
+
 ## How to find out a new version is available
 
 cc-clip does not currently auto-check for updates. Pick whichever of these
 fits your workflow:
 
 - **Watch the repository on GitHub.** Open
-  <https://github.com/ShunmeiCho/cc-clip>, click **Watch -> Custom -> Releases**.
+  <https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH>, click **Watch -> Custom -> Releases**.
   GitHub will email you whenever a tag ships.
 - **Subscribe to the releases Atom feed** at
-  <https://github.com/ShunmeiCho/cc-clip/releases.atom>.
+  <https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/releases.atom>.
 - **Check your current version against the latest:**
 
   ```sh
   cc-clip --version
-  curl -fsSL https://api.github.com/repos/ShunmeiCho/cc-clip/releases/latest \
+  curl -fsSL https://api.github.com/repos/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/releases/latest \
     | grep '"tag_name"' | head -1 | cut -d'"' -f4
   ```
 
@@ -72,8 +78,8 @@ There is no beta-to-stable breaking change.
   `/releases/latest` API call):
 
     ```sh
-    curl -fsSL https://raw.githubusercontent.com/ShunmeiCho/cc-clip/main/scripts/install.sh \
-      | CC_CLIP_VERSION=v0.9.0 sh
+    curl -fsSL https://raw.githubusercontent.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/main/scripts/install.sh \
+      | CC_CLIP_VERSION=v0.13.4 sh
     ```
 
 Otherwise the upgrade is the normal forward path below: update the local binary,
@@ -114,7 +120,7 @@ restarting the service).
 ### Option B: re-run the install script
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/ShunmeiCho/cc-clip/main/scripts/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/main/scripts/install.sh | sh
 ```
 
 This fetches the archive for the latest `v*` tag, extracts it, replaces the
@@ -126,18 +132,22 @@ or pre-0.6.2 cc-clip).
 ### Option C: manual download
 
 Pick the archive matching your OS and arch from
-<https://github.com/ShunmeiCho/cc-clip/releases/latest>, then:
+<https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/releases/latest>, then:
 
 ```sh
-V=0.9.0   # latest version without the v prefix
+V=0.13.4   # selected release without the v prefix
 OS=darwin         # or linux
 ARCH=arm64        # or amd64
 
 cd /tmp
-curl -fsSL -o cc-clip.tar.gz \
-  "https://github.com/ShunmeiCho/cc-clip/releases/download/v${V}/cc-clip_${V}_${OS}_${ARCH}.tar.gz"
-tar -xzf cc-clip.tar.gz
-install -m 0755 cc-clip ~/.local/bin/cc-clip
+ARCHIVE="cc-clip_${V}_${OS}_${ARCH}.tar.gz"
+BASE="https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/releases/download/v${V}"
+curl -fsSL -o "$ARCHIVE" "$BASE/$ARCHIVE" &&
+  curl -fsSL -o checksums.txt "$BASE/checksums.txt" &&
+  grep -F "  $ARCHIVE" checksums.txt > cc-clip.selected.sha256 &&
+  shasum -a 256 -c cc-clip.selected.sha256 &&
+  tar -xzf "$ARCHIVE" &&
+  install -m 0755 cc-clip ~/.local/bin/cc-clip
 # macOS only: clear quarantine + ad-hoc sign so Gatekeeper allows it
 [ "$(uname -s)" = "Darwin" ] && xattr -cr ~/.local/bin/cc-clip \
   && codesign --force --sign - --identifier com.cc-clip.cli ~/.local/bin/cc-clip
@@ -213,7 +223,7 @@ unreleased direct RemoteForward/shim behavior.
 2. For a release that includes the Windows installer, run:
 
     ```powershell
-    irm https://raw.githubusercontent.com/ShunmeiCho/cc-clip/main/scripts/install.ps1 | iex
+    irm https://raw.githubusercontent.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/main/scripts/install.ps1 | iex
     ```
 
     It downloads `cc-clip_<version>_windows_<arch>.zip`, verifies
@@ -225,17 +235,17 @@ unreleased direct RemoteForward/shim behavior.
     To install a specific version for rollback or pinning:
 
     ```powershell
-    $env:CC_CLIP_VERSION="v0.5.0"; irm https://raw.githubusercontent.com/ShunmeiCho/cc-clip/main/scripts/install.ps1 | iex
+    $env:CC_CLIP_VERSION="v0.13.3"; irm https://raw.githubusercontent.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/main/scripts/install.ps1 | iex
     ```
 
     If you installed cc-clip somewhere else, pass that directory:
 
     ```powershell
-    $env:CC_CLIP_INSTALL_DIR="$HOME\bin"; irm https://raw.githubusercontent.com/ShunmeiCho/cc-clip/main/scripts/install.ps1 | iex
+    $env:CC_CLIP_INSTALL_DIR="$HOME\bin"; irm https://raw.githubusercontent.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/main/scripts/install.ps1 | iex
     ```
 
 3. Manual fallback: download the new zip from
-   <https://github.com/ShunmeiCho/cc-clip/releases/latest> (pick
+   <https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/releases/latest> (pick
    `cc-clip_<version>_windows_amd64.zip` or `..._arm64.zip`), then extract
    `cc-clip.exe` on top of your existing install location.
 
@@ -311,7 +321,7 @@ There are two flavours of rollback, and they are **not** equally safe:
 
 ### Pin a version (forward or backward)
 
-- **`cc-clip update --to v0.5.0`** (cc-clip 0.6.2+): same semantics as a
+- **`cc-clip update --to v0.13.3`** (cc-clip 0.6.2+): same semantics as a
   forward upgrade — checksum-verify, swap, restart, verify — but against
   the pinned release tag instead of `/latest`.
 
@@ -322,27 +332,27 @@ There are two flavours of rollback, and they are **not** equally safe:
   do not yet have `cc-clip update`:
 
     ```sh
-    curl -fsSL https://raw.githubusercontent.com/ShunmeiCho/cc-clip/main/scripts/install.sh \
-      | CC_CLIP_VERSION=v0.5.0 sh
+    curl -fsSL https://raw.githubusercontent.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/main/scripts/install.sh \
+      | CC_CLIP_VERSION=v0.13.3 sh
     ```
 
     The env var must be set on the **right-hand side of the pipe** (the `sh` that
-    runs the script), not on `curl`. `CC_CLIP_VERSION=v0.5.0 curl ... | sh` would
+    runs the script), not on `curl`. `CC_CLIP_VERSION=v0.13.3 curl ... | sh` would
     export the pin only into the `curl` process and the piped `sh` would still
     install `/latest`.
 
-  The value must be a full tag (for example `v0.5.0`); a missing `v` prefix is
+  The value must be a full tag (for example `v0.13.3`); a missing `v` prefix is
   accepted. An invalid value aborts the install with an actionable error.
 
 - **Via install script, the manual way:** you can also skip `CC_CLIP_VERSION`
   and use the Option C manual-download commands above with `V=` set to the
-  version you want (for example `V=0.5.0` downgrades to `v0.5.0`).
+  version you want (for example `V=0.13.3` downgrades to `v0.13.3`).
 
 - **Windows PowerShell installer:** same pinning model, using the Windows zip
   asset and `Get-FileHash` verification:
 
     ```powershell
-    $env:CC_CLIP_VERSION="v0.5.0"; irm https://raw.githubusercontent.com/ShunmeiCho/cc-clip/main/scripts/install.ps1 | iex
+    $env:CC_CLIP_VERSION="v0.13.3"; irm https://raw.githubusercontent.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/main/scripts/install.ps1 | iex
     ```
 
 ### Rollback runbook

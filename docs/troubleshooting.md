@@ -218,14 +218,14 @@ To force a new token: `cc-clip serve --rotate-token`.
 **Fix:** In releases after v0.12.2, `update` and `install.sh` fall back to the `github.com/.../releases/latest` redirect, which is not rate-limited, so this should no longer stop them. On an older cc-clip, or if both lookups fail, skip the lookup or authenticate it:
 
 ```bash
-# Name the version (see https://github.com/ShunmeiCho/cc-clip/releases); no API call is made
+# Name the version (see https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/releases); no API call is made
 cc-clip update --to vX.Y.Z
 
 # Or send a token: 5000 requests/hour instead of 60
 GH_TOKEN=$(gh auth token) cc-clip update
 
 # Fresh install: pin the version for install.sh
-curl -fsSL https://raw.githubusercontent.com/ShunmeiCho/cc-clip/main/scripts/install.sh | CC_CLIP_VERSION=vX.Y.Z sh
+curl -fsSL https://raw.githubusercontent.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/main/scripts/install.sh | CC_CLIP_VERSION=vX.Y.Z sh
 ```
 
 `update` also prints when the API limit resets. Downloading the release archive itself is not affected by this limit.
@@ -320,6 +320,6 @@ the raw image to the agent, so cc-clip is never asked for it.
 
 ```bash
 cc-clip service uninstall
-curl -fsSL https://raw.githubusercontent.com/ShunmeiCho/cc-clip/main/scripts/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/main/scripts/install.sh | sh
 cc-clip setup myserver
 ```

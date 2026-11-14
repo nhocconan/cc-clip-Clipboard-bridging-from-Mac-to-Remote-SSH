@@ -5,15 +5,15 @@ Thanks for your interest in contributing to cc-clip!
 ## Getting Started
 
 ```bash
-git clone https://github.com/ShunmeiCho/cc-clip.git
-cd cc-clip
+git clone https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH.git
+cd cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH
 make build
 make test
 ```
 
 ## Development
 
-**Requirements:** Go 1.21+, `pngpaste` (macOS, `brew install pngpaste`)
+**Requirements:** Go 1.25.13 or newer (see `go.mod`), `pngpaste` (macOS, `brew install pngpaste`)
 
 **Project structure:**
 - `cmd/cc-clip/` — CLI entry point
@@ -40,8 +40,8 @@ make release-local  # Cross-compile for local testing only (NOT for GitHub relea
 
 ### Bug Reports
 
-Open an [issue](https://github.com/ShunmeiCho/cc-clip/issues) with:
-- cc-clip version (`cc-clip version`)
+Open an [issue](https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/issues) with:
+- cc-clip version (`cc-clip --version`)
 - Local OS and remote OS/arch
 - Steps to reproduce
 - Output of `cc-clip doctor --host <your-host>` (redact sensitive info)
@@ -65,6 +65,26 @@ Open an issue describing the use case and proposed solution.
 - Keep files under 400 lines where possible
 - Prefer immutability — create new objects rather than mutating
 - Add comments for non-obvious logic
+
+## Maintaining CLI compatibility
+
+Before releasing, review changes since the previous release in
+[upstream cc-clip](https://github.com/ShunmeiCho/cc-clip/commits/main/),
+[Claude Code](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md),
+[Codex CLI](https://learn.chatgpt.com/docs/changelog), and
+[Antigravity CLI](https://antigravity.google/docs/changelog?tab=cli).
+Record relevant changes and the validation performed in the pull request.
+
+Verify the managed hook configuration and payload contracts, then test image
+paste and notifications on a remote Linux host with the CLI versions being
+claimed as supported. Unit tests alone do not establish interactive compatibility.
+Keep existing user hooks intact and check for duplicate notifications when a CLI
+adds native notification support.
+
+CI runs Linux, Windows, and macOS tests on pull requests and weekly. Dependabot
+proposes Go module and GitHub Actions updates weekly; updates still need review
+and passing checks. Run `make release-preflight` before tagging; see
+[the release guide](docs/release.md).
 
 ## Coordinated Changes
 
