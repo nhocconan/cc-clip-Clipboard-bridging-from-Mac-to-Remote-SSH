@@ -51,14 +51,14 @@ exit
 ## Step 1: Install `cc-clip.exe`
 
 For the released hotkey/send workflow, install a Windows release binary from
-[GitHub Releases](https://github.com/ShunmeiCho/cc-clip/releases), put
+[GitHub Releases](https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/releases), put
 `cc-clip.exe` in a stable directory such as
 `%USERPROFILE%\.local\bin`, and add that directory to your user `PATH`.
 
 If your release includes `scripts/install.ps1`, use the PowerShell installer:
 
 ```powershell
-irm https://raw.githubusercontent.com/ShunmeiCho/cc-clip/main/scripts/install.ps1 | iex
+irm https://raw.githubusercontent.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/main/scripts/install.ps1 | iex
 ```
 
 It downloads the latest Windows zip, verifies `checksums.txt`, and installs
@@ -69,7 +69,7 @@ not in the latest stable release.
 If you want a different install directory:
 
 ```powershell
-$env:CC_CLIP_INSTALL_DIR="$HOME\bin"; irm https://raw.githubusercontent.com/ShunmeiCho/cc-clip/main/scripts/install.ps1 | iex
+$env:CC_CLIP_INSTALL_DIR="$HOME\bin"; irm https://raw.githubusercontent.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/main/scripts/install.ps1 | iex
 ```
 
 If the installer tells you to add the directory to `PATH`, add it to your
