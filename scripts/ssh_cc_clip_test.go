@@ -26,6 +26,12 @@ printf '%s\n' "$*" >> "$EVENTS"
 if [[ "$MODE" == auth && " $* " == *" BatchMode=yes "* ]]; then exit 255; fi
 case "$*" in
  *cc-clip-forward-healthy*)
+   if [[ "$MODE" == failed-ss ]]; then bash -c "${!#}"; exit $?; fi
+   if [[ "$MODE" == recover && ! -f "$EVENTS.held" ]]; then
+     touch "$EVENTS.held"
+     echo cc-clip-forward-held
+     exit 0
+   fi
    if [[ "$MODE" == retry && ! -f "$EVENTS.failed" ]]; then echo cc-clip-forward-free; else echo "cc-clip-forward-$STATE"; fi
    exit 0 ;;
 esac
@@ -39,6 +45,13 @@ exit 0
 	if err := os.WriteFile(filepath.Join(dir, "ssh"), []byte(fake), 0755); err != nil {
 		t.Fatal(err)
 	}
+	if mode == "failed-ss" {
+		for _, name := range []string{"curl", "ss"} {
+			if err := os.WriteFile(filepath.Join(dir, name), []byte("#!/bin/sh\nexit 1\n"), 0755); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
 	// Make the previous autossh implementation fail promptly instead of retrying forever.
 	if err := os.WriteFile(filepath.Join(dir, "autossh"), []byte("#!/bin/sh\nkill -TERM \"$PPID\"\n"), 0755); err != nil {
 		t.Fatal(err)
@@ -51,18 +64,18 @@ exit 0
 	t.Cleanup(cancel)
 	cmd := exec.CommandContext(ctx, "bash", script, "test-host")
 	events := filepath.Join(dir, "events")
-	cmd.Env = append(os.Environ(), "PATH="+dir+string(os.PathListSeparator)+os.Getenv("PATH"), "HOME="+dir, "XDG_CACHE_HOME="+dir, "EVENTS="+events, "STATE="+state, "MODE="+mode)
+	cmd.Env = append(os.Environ(), "PATH="+dir+string(os.PathListSeparator)+os.Getenv("PATH"), "HOME="+dir, "XDG_CACHE_HOME="+dir, "EVENTS="+events, "STATE="+state, "MODE="+mode, "CC_CLIP_FORWARD_WAIT_SECONDS=0")
 	return cmd, events, filepath.Join(dir, "cc-clip", "screen-locks", "test-host-18339")
 }
 
 func TestSSHWrapperForwardStates(t *testing.T) {
-	for _, state := range []string{"held", "healthy", "free"} {
+	for _, state := range []string{"held", "unknown", "healthy", "free"} {
 		t.Run(state, func(t *testing.T) {
 			cmd, events, lock := wrapperFixture(t, state, "")
 			out, err := cmd.CombinedOutput()
 			data, _ := os.ReadFile(events)
 			attached := strings.Contains(string(data), "screen -D -RR")
-			if state == "held" {
+			if state == "held" || state == "unknown" {
 				if err == nil || attached || !strings.Contains(string(out), "cc-clip doctor --host test-host") {
 					t.Fatalf("occupied port must stop with guidance, err=%v output=%s events=%s", err, out, data)
 				}
@@ -83,6 +96,50 @@ func TestSSHWrapperForwardStates(t *testing.T) {
 				t.Fatalf("lock leaked: %v", err)
 			}
 		})
+	}
+}
+
+func TestSSHWrapperWaitsForStaleForwardAfterVPNDrop(t *testing.T) {
+	for _, state := range []string{"free", "healthy"} {
+		t.Run(state, func(t *testing.T) {
+			cmd, events, lock := wrapperFixture(t, state, "recover")
+			cmd.Env = append(cmd.Env, "CC_CLIP_FORWARD_WAIT_SECONDS=10")
+			out, err := cmd.CombinedOutput()
+			if err != nil {
+				t.Fatalf("did not recover after stale forward cleared: %v\n%s", err, out)
+			}
+			data, _ := os.ReadFile(events)
+			if !strings.Contains(string(out), "Waiting for") || strings.Count(string(data), "screen -D -RR") != 1 {
+				t.Fatalf("must wait, reprobe, then attach once: %s\n%s", out, data)
+			}
+			for _, line := range strings.Split(string(data), "\n") {
+				if strings.Contains(line, "screen -D -RR") && strings.Contains(line, "ClearAllForwardings=yes") != (state == "healthy") {
+					t.Fatalf("incorrect forward ownership after recovery: %s", line)
+				}
+			}
+			if _, err := os.Stat(lock); !os.IsNotExist(err) {
+				t.Fatalf("lock leaked: %v", err)
+			}
+		})
+	}
+}
+
+func TestSSHWrapperBoundsStaleForwardWait(t *testing.T) {
+	cmd, events, _ := wrapperFixture(t, "held", "")
+	cmd.Env = append(cmd.Env, "CC_CLIP_FORWARD_WAIT_SECONDS=1")
+	out, err := cmd.CombinedOutput()
+	data, _ := os.ReadFile(events)
+	if err == nil || !strings.Contains(string(out), "still occupied") || strings.Contains(string(data), "screen -D -RR") {
+		t.Fatalf("must stop after bounded recovery wait: %v\n%s\n%s", err, out, data)
+	}
+}
+
+func TestSSHWrapperFailedListenerCheckIsNotFree(t *testing.T) {
+	cmd, events, _ := wrapperFixture(t, "free", "failed-ss")
+	out, err := cmd.CombinedOutput()
+	data, _ := os.ReadFile(events)
+	if err == nil || !strings.Contains(string(out), "cannot be checked") || strings.Contains(string(data), "screen -D -RR") {
+		t.Fatalf("failed ss must not attempt a new forward: %v\n%s\n%s", err, out, data)
 	}
 }
 
