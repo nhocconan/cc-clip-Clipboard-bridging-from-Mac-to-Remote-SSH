@@ -127,8 +127,28 @@ its SSH child and retry loop; the remote screen remains available for reattach.
 A lock prevents two wrappers on this machine from fighting over the same host
 and port. Host aliases for the same server have separate locks.
 
-An occupied but unresponsive port stops with `cc-clip doctor` guidance. The
-wrapper never kills remote sessions automatically. Follow the stale-session
+An occupied but unresponsive port is checked again every three seconds for up
+to 120 seconds, allowing the old SSH connection to recover or the server to
+release its port after a VPN switch. Set `CC_CLIP_FORWARD_WAIT_SECONDS` to
+change this wait (use `0` to stop immediately). Each health probe can take up
+to four additional seconds. An uncheckable port still stops immediately.
+
+The remote SSH server must detect dead clients for automatic port release.
+An administrator can scope this to your remote user in `sshd_config`:
+
+```text
+Match User your-remote-user
+    ClientAliveInterval 15
+    ClientAliveCountMax 3
+Match all
+```
+
+Validate with `sshd -t`, then reload the SSH service. These settings apply to
+new connections; an existing stale holder still needs the diagnosis above.
+Client-side `ServerAliveInterval` alone cannot release a server's stale port.
+
+If the wait expires, the wrapper stops with `cc-clip doctor` guidance. It
+never kills remote sessions automatically. Follow the stale-session
 diagnosis above before ending a holder, especially if another computer also
 connects to this server.
 

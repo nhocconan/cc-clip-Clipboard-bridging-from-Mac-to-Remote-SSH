@@ -9,6 +9,13 @@ if [[ $# -lt 1 || $# -gt 2 || ! "$host" =~ ^[A-Za-z0-9._-]+$ || ! "$screen_name"
   exit 2
 fi
 
+forward_wait_seconds="${CC_CLIP_FORWARD_WAIT_SECONDS:-120}"
+if [[ ! "$forward_wait_seconds" =~ ^[0-9]+$ || ${#forward_wait_seconds} -gt 5 ]]; then
+  echo "CC_CLIP_FORWARD_WAIT_SECONDS must be an integer from 0 to 99999." >&2
+  exit 2
+fi
+forward_wait_seconds=$((10#$forward_wait_seconds))
+
 config=$(ssh -G "$host") || exit 1
 remote_port=$(printf '%s\n' "$config" | awk '$1 == "remoteforward" { print $2; exit }')
 if [[ ! "$remote_port" =~ ^[0-9]+$ ]]; then
@@ -55,6 +62,7 @@ trap 'exit 143' TERM
 
 # Run probes as children too, so terminal closure also stops a blocked probe.
 probe_file="$lock/probe"
+held_since=
 while true; do
   ssh -T -o ConnectTimeout=10 \
     -o ServerAliveInterval=15 -o ServerAliveCountMax=3 \
@@ -62,7 +70,9 @@ while true; do
     "if curl -fsS --connect-timeout 2 --max-time 4 http://127.0.0.1:${remote_port}/health 2>/dev/null | grep -Eq '\"service\"[[:space:]]*:[[:space:]]*\"cc-clip\"'; then
        echo cc-clip-forward-healthy
      elif command -v ss >/dev/null 2>&1; then
-       if [ -n \"\$(ss -H -ltn 'sport = :${remote_port}')\" ]; then
+       if ! listeners=\$(ss -H -ltn 'sport = :${remote_port}' 2>/dev/null); then
+         echo cc-clip-forward-unknown
+       elif [ -n \"\$listeners\" ]; then
          echo cc-clip-forward-held
        else
          echo cc-clip-forward-free
@@ -80,16 +90,35 @@ while true; do
   if [[ $probe_rc -eq 0 ]]; then
     case "$state" in
       *cc-clip-forward-healthy*)
+        held_since=
         echo "Reusing the healthy clipboard tunnel on $host:$remote_port." >&2
         forward_option=ClearAllForwardings=yes
         ;;
-      *cc-clip-forward-held*|*cc-clip-forward-unknown*)
+      *cc-clip-forward-held*)
+        if [[ -z "$held_since" ]]; then
+          held_since=$SECONDS
+          echo "Waiting for the unresponsive clipboard tunnel on $host:$remote_port to recover or release its port (up to ${forward_wait_seconds}s)…" >&2
+        fi
+        if (( SECONDS - held_since < forward_wait_seconds )); then
+          sleep 3 &
+          child=$!
+          wait "$child"
+          child=
+          continue
+        fi
+        echo "Port $remote_port on $host is still occupied; no healthy cc-clip tunnel answered." >&2
+        echo "Run: cc-clip doctor --host $host" >&2
+        echo "For VPN recovery, the server needs ClientAliveInterval 15 and ClientAliveCountMax 3." >&2
+        echo "Identify the stale SSH session before ending it; no sessions were killed." >&2
+        exit 1
+        ;;
+      *cc-clip-forward-unknown*)
         echo "Port $remote_port on $host is occupied or cannot be checked; no healthy cc-clip tunnel answered." >&2
         echo "Run: cc-clip doctor --host $host" >&2
         echo "Identify the stale SSH session before ending it; no sessions were killed." >&2
         exit 1
         ;;
-      *cc-clip-forward-free*) ;;
+      *cc-clip-forward-free*) held_since= ;;
       *) echo "Unexpected tunnel probe response from $host: $state" >&2; exit 1 ;;
     esac
     echo "Connecting to $host; remote screen: $screen_name" >&2
