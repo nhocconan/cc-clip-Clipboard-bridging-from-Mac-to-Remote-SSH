@@ -37,6 +37,8 @@ make release-local  # Cross-compile for local testing only (NOT for GitHub relea
 > goreleaser. Never upload these to GitHub Releases — the install script will 404.
 > Production releases are automated via GitHub Actions on tag push. See CLAUDE.md.
 
+SSH recovery and process cleanup must follow the [enforced tunnel rules](docs/anti-patterns.md), checked by `make tunnel-lifecycle-check`.
+
 ## How to Contribute
 
 ### Bug Reports
