@@ -29,6 +29,7 @@ make test
 make build          # Build binary
 make test           # Run all tests
 make vet            # Run go vet
+make tunnel-lifecycle-check  # Audit SSH recovery and process ownership
 make release-local  # Cross-compile for local testing only (NOT for GitHub releases)
 ```
 
@@ -55,7 +56,7 @@ Open an issue describing the use case and proposed solution.
 
 1. Fork the repo and create a feature branch
 2. Write tests for new functionality
-3. Ensure `make test` and `make vet` pass
+3. Ensure `make test`, `make vet`, and `make tunnel-lifecycle-check` pass
 4. Use conventional commit messages: `feat:`, `fix:`, `refactor:`, `docs:`, `test:`
 5. Keep PRs focused — one feature or fix per PR
 

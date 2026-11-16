@@ -79,7 +79,11 @@ ps -o pid,lstart,args -u "$(id -u)" | grep '[s]shd'
 ps -o pid,lstart,command -ax | grep '[s]sh'
 ```
 
-The holder is the remote session with no matching client here. `lsof` and `ss -p` usually cannot show it to a normal user: `sshd` marks itself non-dumpable, so even your own session's sockets are hidden.
+Use these lists as clues: a remote session with no matching client here may
+belong to another workstation. Confirm the session is yours and stale before
+ending it; missing local clients alone do not prove ownership. `lsof` and
+`ss -p` usually cannot show the holder to a normal user: `sshd` marks itself
+non-dumpable, so even your own session's sockets are hidden.
 
 **Fix:**
 

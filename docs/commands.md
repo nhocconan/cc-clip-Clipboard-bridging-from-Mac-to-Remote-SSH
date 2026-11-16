@@ -112,6 +112,7 @@ and tmux copy-mode — is covered in [reverse copy](reverse-copy.md).
 | Fetch timeout | 15000ms | `CC_CLIP_FETCH_TIMEOUT_MS` |
 | Text write timeout (`xclip`/`wl-copy` copy) | 5000ms, or `CC_CLIP_FETCH_TIMEOUT_MS` when set | `CC_CLIP_WRITE_TIMEOUT_MS` |
 | Debug logs | off | `CC_CLIP_DEBUG=1` |
+| Screen wrapper wait for an unowned listener ([details](troubleshooting.md#reconnecting-a-persistent-screen-session)) | 20 seconds | `CC_CLIP_FORWARD_WAIT_SECONDS` (0–99999; `scripts/ssh-cc-clip.sh` only) |
 
 > Size limits apply to the local daemon (`cc-clip serve`) and Go fetch clients
 > (`cc-clip paste`, x11-bridge) in the process where the env var is set.
