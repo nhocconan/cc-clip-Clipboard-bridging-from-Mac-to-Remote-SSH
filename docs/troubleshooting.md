@@ -79,7 +79,11 @@ ps -o pid,lstart,args -u "$(id -u)" | grep '[s]shd'
 ps -o pid,lstart,command -ax | grep '[s]sh'
 ```
 
-The holder is the remote session with no matching client here. `lsof` and `ss -p` usually cannot show it to a normal user: `sshd` marks itself non-dumpable, so even your own session's sockets are hidden.
+Use these lists as clues: a remote session with no matching client here may
+belong to another workstation. Confirm the session is yours and stale before
+ending it; missing local clients alone do not prove ownership. `lsof` and
+`ss -p` usually cannot show the holder to a normal user: `sshd` marks itself
+non-dumpable, so even your own session's sockets are hidden.
 
 **Fix:**
 
@@ -124,17 +128,34 @@ installation owns it; use `cc-clip tunnel run` for authenticated identity checks
 SSH transport failures retry after three seconds and probe the port again.
 A normal screen detach or exit ends the wrapper. Closing the terminal stops
 its SSH child and retry loop; the remote screen remains available for reattach.
-A lock prevents two wrappers on this machine from fighting over the same host
-and port. Host aliases for the same server have separate locks.
+Local locking uses `shlock` (included with macOS) or `flock` (Linux util-linux).
+It recovers dead PID locks and does not rely on the old `.acquire` directory.
+Host aliases for the same server have separate local locks.
 
-An occupied but unresponsive port is checked again every three seconds for up
-to 120 seconds, allowing the old SSH connection to recover or the server to
-release its port after a VPN switch. Set `CC_CLIP_FORWARD_WAIT_SECONDS` to
-change this wait (use `0` to stop immediately). Each health probe can take up
-to four additional seconds. An uncheckable port still stops immediately.
+Each attachment runs a watchdog on the Linux server. After three failed health
+checks (roughly 9–15 seconds), it ends **its own SSH session**, releasing its
+listeners even when a VPN/Tailscale switch blackholes the old TCP connection.
+It preserves the persistent screen session and its programs. A connection that
+reuses an existing healthy tunnel also watches health and reconnects if that
+tunnel disappears. A temporary daemon outage is treated as an unhealthy tunnel;
+restore the local daemon with `cc-clip service install` if reconnects continue.
 
-The remote SSH server must detect dead clients for automatic port release.
-An administrator can scope this to your remote user in `sshd_config`:
+Forward owners write a private lease scoped to a random workstation ID and the
+remote port. On reconnect, the wrapper can release its own stale session after
+verifying that lease, remote UID, `sshd`/`sshd-session` command, and Linux process
+start ticks and boot ID. PID reuse or server reboot and another workstation's lease do not authorize cleanup.
+No sudo or server configuration change is required for these owned sessions.
+
+An **unowned** listener (including one from an older wrapper or plain SSH) is
+checked for up to 20 seconds before the wrapper exits with diagnosis guidance.
+Set `CC_CLIP_FORWARD_WAIT_SECONDS=0` to fail immediately, or choose another
+bounded wait. This wait excludes the initial connection and health probe;
+individual probe SSH commands have a 15-second watchdog. The wrapper cannot
+safely identify a legacy listener solely from a failed health check. Use the
+stale-session diagnosis above once; new wrapper sessions then have leases.
+
+Server keepalives remain useful for ordinary SSH clients outside this wrapper.
+An administrator can scope these to your remote user in `sshd_config`:
 
 ```text
 Match User your-remote-user
@@ -144,20 +165,23 @@ Match all
 ```
 
 Validate with `sshd -t`, then reload the SSH service. These settings apply to
-new connections; an existing stale holder still needs the diagnosis above.
-Client-side `ServerAliveInterval` alone cannot release a server's stale port.
+new connections; an existing stale holder still needs diagnosis. Client-side
+`ServerAliveInterval` alone cannot release a server's stale port.
 
-If the wait expires, the wrapper stops with `cc-clip doctor` guidance. It
-never kills remote sessions automatically. Follow the stale-session
-diagnosis above before ending a holder, especially if another computer also
-connects to this server.
+The wrapper requires a Linux remote with `/proc`, `ps`, `curl`, and `screen`,
+and exactly one numeric IPv4 loopback `RemoteForward` for the host. It stops
+with a clear error if it cannot verify its session identity. HTTP health checks
+bypass proxy environment variables so a proxy outage cannot masquerade as a
+broken loopback tunnel. The public health check identifies the service, not
+which local installation owns it; `cc-clip tunnel run` verifies daemon identity.
 
 Older custom wrappers that print `Releasing a stale reverse forward` can hide
 cleanup failures: `sudo -n` requires passwordless sudo, and a parser matching
 only `sshd` misses newer OpenSSH's `sshd-session` process name. An inner
 `autossh` retry loop also bypasses cleanup between attempts and can survive
 its original terminal. Replace those wrappers with the repository version;
-rebuilding the cc-clip binary alone does not update a script in `~/scripts`.
+rebuilding or updating the cc-clip binary alone does not update a script in
+`~/scripts`.
 
 ---
 

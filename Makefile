@@ -26,7 +26,7 @@ clean:
 # Run this before tagging a new release so any drift between the workflow,
 # .goreleaser.yaml, or scripts/install.sh surfaces locally instead of after
 # a tag push has already burned a version number.
-release-preflight: test vet
+release-preflight: tunnel-lifecycle-check test vet
 	@echo "==> cross-compile sanity (6 target triples)"
 	@for platform in $(PLATFORMS); do \
 		os=$${platform%%/*}; \
@@ -97,3 +97,7 @@ release-notes-check:
 # English source changed after that SHA (docs/i18n/TRANSLATION_BRIEF.md).
 i18n-check:
 	@bash scripts/check-i18n-markers.sh
+
+# Regression gate for safe recovery after VPN/Tailscale blackholes.
+tunnel-lifecycle-check:
+	bash scripts/audit/tunnel-lifecycle.sh

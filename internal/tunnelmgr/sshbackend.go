@@ -355,7 +355,7 @@ func (b *Backend) runControl(ctx context.Context, operation string, extra ...str
 // forwarding. The user's SSH config is still read to resolve the named host.
 func (b *Backend) MasterArgs(controlPath string) []string {
 	return []string{
-		"-M", "-N", "-T", "-S", controlPath,
+		"-M", "-T", "-S", controlPath,
 		"-o", "BatchMode=yes",
 		"-o", "ClearAllForwardings=yes",
 		"-o", "ExitOnForwardFailure=yes",
@@ -363,9 +363,15 @@ func (b *Backend) MasterArgs(controlPath string) []string {
 		"-o", "ControlPersist=no",
 		"-o", "ForwardAgent=no",
 		"-o", "ForwardX11=no",
-		"-o", "ServerAliveInterval=15",
-		"-o", "ServerAliveCountMax=3",
-		"--", b.Spec.Host,
+		"-o", "ServerAliveInterval=5",
+		"-o", "ServerAliveCountMax=2",
+		"-o", "ConnectTimeout=8",
+		"-o", "ConnectionAttempts=1",
+		"-o", "ForkAfterAuthentication=no",
+		"-o", "SessionType=default",
+		"-o", "RemoteCommand=none",
+		"-o", "RequestTTY=no",
+		"--", b.Spec.Host, shim.WrapRemoteShell(tunnel.RemoteWatchdogCommand(b.Spec.Port)),
 	}
 }
 

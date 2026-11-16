@@ -24,6 +24,7 @@ Notification path:
 make build                          # Build binary with version from git tags
 make test                           # Run all tests (go test ./... -count=1)
 make vet                            # Run go vet
+make tunnel-lifecycle-check         # Audit SSH recovery and process ownership
 go test ./internal/tunnel/ -v -run TestFetchImageRoundTrip  # Single test
 make release-local                  # Build bare binaries for all platforms (dist/), local testing only
 ```
@@ -58,7 +59,7 @@ goreleaser config: `.goreleaser.yaml`. Release is published automatically (not d
 8. **service** (`internal/service/launchd.go`) — macOS launchd integration: `Install()`, `Uninstall()`, `Status()`. Generates plist for auto-start daemon.
 9. **xvfb** (`internal/xvfb/`) — Manages Xvfb virtual X server on remote. `StartRemote()` auto-detects display via `-displayfd`, reuses healthy instances, writes PID/display to `~/.cache/cc-clip/codex/`. `StopRemote()` verifies PID+command before killing.
 10. **x11bridge** (`internal/x11bridge/`) — Go X11 selection owner using `github.com/jezek/xgb` (pure Go, no CGo). Claims CLIPBOARD ownership on Xvfb, responds to SelectionRequest events by fetching image data on-demand from the cc-clip HTTP daemon via SSH tunnel. Supports TARGETS negotiation, direct transfer, and INCR protocol for images >256KB; stalled INCR transfers are cleared after a 30s inactivity timeout so future paste requests are not refused forever.
-11. **tunnelmgr** (`internal/tunnelmgr/`) — Phase 1A foreground managed-tunnel core. It gates SSH startup on the local daemon, owns an isolated two-stage SSH master (`ClearAllForwardings` then `-O forward`), preserves fail-closed public/identity probe states, persists crash-loop runtime, and never edits SSH config or installs a service.
+11. **tunnelmgr** (`internal/tunnelmgr/`) — Phase 1A foreground managed-tunnel core. It gates SSH startup on the local daemon, owns an isolated two-stage SSH master (`ClearAllForwardings` then `-O forward`), runs `tunnel.RemoteWatchdogCommand()` on the server to release its own SSH session after tunnel health fails, preserves fail-closed public/identity probe states, persists crash-loop runtime, and never edits SSH config or installs a service.
 
 ### Notification Bridge
 
@@ -148,6 +149,7 @@ When `connect` detects a different remote arch (e.g., Mac arm64 → Linux amd64)
 
 ## Files That Need Coordinated Changes
 
+- Changing SSH reconnect lifecycle or process cleanup: screen wrapper + managed remote watchdog + [enforced tunnel rules](docs/anti-patterns.md); run `make tunnel-lifecycle-check`.
 - Adding a clipboard data API endpoint: `daemon/server.go` (handler) + `tunnel/fetch.go` (client method) + `shim/template.go` (bash interception pattern)
 - Changing the managed-tunnel identity contract: `daemon/server.go` + `instanceid/instanceid.go` + `tunnel/identity.go` + `tunnelmgr/supervisor.go`
 - Changing token format: `token/token.go` + `shim/connect.go:WriteRemoteToken` + shim templates (`_cc_clip_read_token`)

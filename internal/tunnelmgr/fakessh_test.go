@@ -9,7 +9,7 @@ import (
 )
 
 // writeFakeSSH writes a /bin/sh script that emulates the OpenSSH surface the
-// backend and supervisor exercise: a long-running master (invoked with -N)
+// backend and supervisor exercise: a long-running master (invoked with -M)
 // and one-shot probe clients multiplexed over the ControlPath. Behavior is
 // selected through environment variables so each test can script failure
 // modes (auth refused, host key rejected, master dies after N seconds).
@@ -27,7 +27,7 @@ cp=""
 op=""
 prev=""
 for a in "$@"; do
-  [ "$a" = "-N" ] && has_n=1
+  [ "$a" = "-M" ] && has_n=1
   [ "$prev" = "-S" ] && cp="$a"
   [ "$prev" = "-O" ] && op="$a"
   case "$a" in ControlPath=*) cp="${a#ControlPath=}" ;; esac

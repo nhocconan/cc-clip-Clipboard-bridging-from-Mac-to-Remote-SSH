@@ -88,7 +88,7 @@ func RemoteHealthProbeCommand(port int) string {
 elif ! command -v curl >/dev/null 2>&1; then
   echo '%[3]s'
 else
-  _body=$(curl -sf --max-time 5 "http://127.0.0.1:%[1]d/health" 2>/dev/null) || _body=""
+  _body=$(curl --noproxy '*' -sf --connect-timeout 2 --max-time 5 "http://127.0.0.1:%[1]d/health" 2>/dev/null) || _body=""
   case "$_body" in
     *'"service":"cc-clip"'*) echo '%[4]s' ;;
     *) echo '%[5]s' ;;
