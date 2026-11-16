@@ -155,7 +155,7 @@ func writeFileAtomic(path string, data []byte) error {
 	if err := tmp.Close(); err != nil {
 		return fmt.Errorf("close temp file for %s: %w", path, err)
 	}
-	if err := os.Rename(tmpPath, path); err != nil {
+	if err := replaceStateFile(tmpPath, path); err != nil {
 		return fmt.Errorf("rename %s into place: %w", path, err)
 	}
 	if dirFile, err := os.Open(dir); err == nil {
