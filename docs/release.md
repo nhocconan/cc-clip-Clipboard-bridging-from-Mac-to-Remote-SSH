@@ -47,7 +47,8 @@ make release-preflight
 
 This target runs, in order:
 
-1. `make test` — same `go test ./...` CI runs.
+1. `make tunnel-lifecycle-check` enforces safe SSH recovery (also in CI).
+   `make test` — same `go test ./...` CI runs.
 2. `go vet ./...`.
 3. Cross-compile sanity for all six target triples.
 4. `goreleaser check` — validates `.goreleaser.yaml` against the current

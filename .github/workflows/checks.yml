@@ -74,6 +74,9 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Policy - SSH tunnel lifecycle and ownership
+        run: make tunnel-lifecycle-check
+
       - name: Build
         run: go build ./...
 

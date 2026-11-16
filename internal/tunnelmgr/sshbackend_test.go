@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/shunmei/cc-clip/internal/shim"
+	"github.com/shunmei/cc-clip/internal/tunnel"
 )
 
 // TestMasterArgs pins the exact ssh invocation of the managed master. The
@@ -21,7 +22,7 @@ func TestMasterArgs(t *testing.T) {
 
 	joined := strings.Join(args, "\x00")
 	for _, want := range []string{
-		"-M", "-N", "-T", "-S", "/ctl/dir/ctl-ab12.sock",
+		"-M", "-T", "-S", "/ctl/dir/ctl-ab12.sock",
 		"BatchMode=yes",
 		"ClearAllForwardings=yes",
 		"ExitOnForwardFailure=yes",
@@ -29,20 +30,29 @@ func TestMasterArgs(t *testing.T) {
 		"ControlPersist=no",
 		"ForwardAgent=no",
 		"ForwardX11=no",
-		"ServerAliveInterval=15",
-		"ServerAliveCountMax=3",
+		"ServerAliveInterval=5",
+		"ServerAliveCountMax=2",
+		"RemoteCommand=none", "SessionType=default", "ForkAfterAuthentication=no",
 	} {
 		if !strings.Contains(joined, want) {
 			t.Errorf("master argv missing %q; got %q", want, args)
 		}
 	}
-	if args[len(args)-1] != "example-host" {
+	if args[len(args)-2] != "example-host" {
 		t.Errorf("host must be the final argument, got %q", args[len(args)-1])
+	}
+	if args[len(args)-1] != shim.WrapRemoteShell(tunnel.RemoteWatchdogCommand(18339)) {
+		t.Fatal("master must run its server-side watchdog")
+	}
+	for _, arg := range args {
+		if arg == "-N" {
+			t.Fatal("-N disables the server watchdog")
+		}
 	}
 	if strings.Contains(joined, "-R") {
 		t.Errorf("master argv must be forwarding-free: %q", args)
 	}
-	if args[len(args)-2] != "--" {
+	if args[len(args)-3] != "--" {
 		t.Errorf("host must follow option terminator: %q", args)
 	}
 }
