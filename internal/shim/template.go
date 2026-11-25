@@ -180,11 +180,46 @@ _cc_clip_post_text() {
         "http://${CC_CLIP_ADDR}/clipboard/text" >/dev/null
 }
 
-# Parse arguments to detect Claude Code invocation patterns
-ARGS="$*"
+# Classify the invocation by parsing argv tokens, never by the order of the
+# joined string: Claude Code 2.1.330+ sends "-o -t TARGETS" where earlier
+# versions sent "-t TARGETS -o", and order-sensitive globs routed the new
+# shape to the text-read branch, so image paste silently failed (upstream
+# ShunmeiCho/cc-clip#197). "$@" itself stays untouched for the fallback.
+_cc_clip_sel=""
+_cc_clip_target=""
+_cc_clip_out=0
+_cc_clip_want=""
+for _cc_clip_arg in "$@"; do
+    case "$_cc_clip_want" in
+        sel) _cc_clip_sel="$_cc_clip_arg"; _cc_clip_want=""; continue ;;
+        target) _cc_clip_target="$_cc_clip_arg"; _cc_clip_want=""; continue ;;
+        skip) _cc_clip_want=""; continue ;;
+    esac
+    case "$_cc_clip_arg" in
+        -selection) _cc_clip_want=sel ;;
+        -t|-target) _cc_clip_want=target ;;
+        -sel|-d|-display|-l|-loops) _cc_clip_want=skip ;;
+        -o|-out) _cc_clip_out=1 ;;
+    esac
+done
 
-case "$ARGS" in
-    *"-selection clipboard"*"-t TARGETS"*"-o"*|*"-selection clipboard"*"-target TARGETS"*"-o"*)
+_cc_clip_kind="passthrough"
+# An option left without its value is malformed: let the real xclip decide.
+if [ -z "$_cc_clip_want" ] && [ "$_cc_clip_sel" = "clipboard" ]; then
+    if [ "$_cc_clip_out" -eq 1 ]; then
+        case "$_cc_clip_target" in
+            TARGETS) _cc_clip_kind="targets" ;;
+            image/*) _cc_clip_kind="image" ;;
+            ""|UTF8_STRING|TEXT|STRING|text/plain*) _cc_clip_kind="text" ;;
+            *) ;; # other targets (text/html, ...) pass through
+        esac
+    else
+        _cc_clip_kind="write"
+    fi
+fi
+
+case "$_cc_clip_kind" in
+    targets)
         # Claude checks clipboard targets
         _cc_clip_log "intercepting TARGETS check"
         if _cc_clip_probe; then
@@ -211,7 +246,7 @@ case "$ARGS" in
         fi
         ;;
 
-    *"-selection clipboard"*"-t image/"*"-o"*|*"-selection clipboard"*"-target image/"*"-o"*)
+    image)
         # Claude reads clipboard image — fetch to temp file then cat (binary-safe + fallback-safe)
         _cc_clip_log "intercepting image read"
         if _cc_clip_probe; then
@@ -226,8 +261,8 @@ case "$ARGS" in
         fi
         ;;
 
-    *"-selection clipboard"*"-t UTF8_STRING"*"-o"*|*"-selection clipboard"*"-t TEXT"*"-o"*|*"-selection clipboard"*"-t STRING"*"-o"*|*"-selection clipboard"*"-t text/plain"*"-o"*|*"-selection clipboard -o"*|*"-o -selection clipboard"*)
-        # Text read — keep this after TARGETS and image cases.
+    text)
+        # Clipboard text read (no target, or a plain-text target).
         _cc_clip_log "intercepting text read"
         if _cc_clip_probe; then
             if _cc_clip_fetch_binary "/clipboard/text"; then
@@ -241,7 +276,7 @@ case "$ARGS" in
         fi
         ;;
 
-    *"-selection clipboard"*)
+    write)
         # Clipboard WRITE (xclip's default mode is -in: stdin -> selection).
         # This is the reverse-clipboard transparent path (#128 phase 2):
         # remote tools that copy via xclip (neovim unnamedplus, tmux

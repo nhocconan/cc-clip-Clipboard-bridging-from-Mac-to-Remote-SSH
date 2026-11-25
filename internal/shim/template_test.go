@@ -404,6 +404,64 @@ func TestShimInterceptsMatchingInvocations(t *testing.T) {
 			args:   []string{"-selection", "clipboard", "-t", "image/png", "-o"},
 			expect: expectInterceptImage,
 		},
+		// Claude Code 2.1.330+ (verified on 2.1.332) puts -o BEFORE -t; the
+		// old order-sensitive globs sent this to the text branch (#197).
+		{
+			name:   "claude_2_1_332_xclip_targets_out_first",
+			render: XclipShim,
+			args:   []string{"-selection", "clipboard", "-o", "-t", "TARGETS"},
+			expect: expectInterceptType,
+		},
+		{
+			name:   "claude_2_1_332_xclip_image_out_first",
+			render: XclipShim,
+			args:   []string{"-selection", "clipboard", "-o", "-t", "image/png"},
+			expect: expectInterceptImage,
+		},
+		{
+			name:   "xclip_targets_selection_last",
+			render: XclipShim,
+			args:   []string{"-o", "-target", "TARGETS", "-selection", "clipboard"},
+			expect: expectInterceptType,
+		},
+		{
+			name:   "xclip_image_out_long_first",
+			render: XclipShim,
+			args:   []string{"-out", "-t", "image/jpeg", "-selection", "clipboard"},
+			expect: expectInterceptImage,
+		},
+		{
+			name:     "xclip_targets_out_first_text",
+			render:   XclipShim,
+			args:     []string{"-selection", "clipboard", "-o", "-t", "TARGETS"},
+			expect:   expectInterceptTextType,
+			clipType: "text",
+		},
+		{
+			name:     "xclip_text_target_out_first",
+			render:   XclipShim,
+			args:     []string{"-selection", "clipboard", "-o", "-t", "UTF8_STRING"},
+			expect:   expectInterceptText,
+			clipType: "text",
+		},
+		{
+			name:   "xclip_html_out_first_passthrough",
+			render: XclipShim,
+			args:   []string{"-selection", "clipboard", "-o", "-t", "text/html"},
+			expect: expectFallback,
+		},
+		{
+			name:   "xclip_primary_out_first_passthrough",
+			render: XclipShim,
+			args:   []string{"-selection", "primary", "-o", "-t", "TARGETS"},
+			expect: expectFallback,
+		},
+		{
+			name:   "xclip_missing_target_value_passthrough",
+			render: XclipShim,
+			args:   []string{"-selection", "clipboard", "-o", "-t"},
+			expect: expectFallback,
+		},
 		{
 			name:   "opencode_xclip_image",
 			render: XclipShim,
