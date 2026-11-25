@@ -1,4 +1,4 @@
-<!-- i18n-source: README.md @ 7fdeff5f8453fe8c74125f3dead11c710941ab15 -->
+<!-- i18n-source: README.md @ 5ef5d92c08c24a2b8098755de9eab8f8ec8358ee -->
 
 > Personal fork of [ShunmeiCho/cc-clip](https://github.com/ShunmeiCho/cc-clip), maintained by nhocconan. See the [installation instructions](README.md#1-install).
 
@@ -100,10 +100,10 @@ cc-clip doctor --host myserver
 | 仅 Codex CLI | `cc-clip setup myserver --codex` | 是 | 是 | Xvfb；设置过程可能需要远程 `sudo` |
 | 所有集成 | `cc-clip setup myserver --all` | 是 | 是 | Codex 需要 Xvfb |
 | opencode | `cc-clip setup myserver --opencode` | 是 | 是 | `xclip` 或 `wl-paste` |
-| Antigravity | `cc-clip setup myserver --agy` | 是 | 是 | agy 1.4.10；`xclip` 或 `wl-paste` shim |
+| Antigravity | `cc-clip setup myserver --agy` | 是 | 是 | agy 1.5.16；`xclip` 或 `wl-paste` shim |
 | Cursor CLI | `cc-clip setup myserver --cursor` | 是 | 是 | Cursor 所在 shell 中需已设置 `DISPLAY` 或 `WAYLAND_DISPLAY` |
 
-Antigravity 图片粘贴已在 Linux 的 agy 1.4.10 上验证。先在远程运行 `agy update`，再运行本地的 `cc-clip connect myserver --agy`。`--no-notify` 只关闭通知，不影响图片粘贴。在无图形桌面的 X11 主机上使用 `DISPLAY=:0 agy`；shim 通过 SSH 获取图片，因此无需真实 X server。确保 `~/.local/bin` 在 PATH 中优先于 `/usr/bin`。Wayland 会话需要在远程安装 `cc-clip install --target wl-paste`。此集成仅转发图片，不转发视频。
+Antigravity 图片粘贴和 Stop 通知已在 Linux 的 agy 1.5.16 上验证。先在远程运行 `agy update`，再运行本地的 `cc-clip connect myserver --agy`。agy 本身只能通过 X11 或 Wayland forwarding（`ssh -X`）在 SSH 上读取图片，没有自己的 clipboard bridge，因此普通 SSH 会话中让 `Ctrl+V` 生效的仍是 cc-clip。通知需要 cc-clip v0.13.7 或更高版本：agy 1.4.3+ 只从插件根目录的 `hooks.json` 加载 hook，而更早的 cc-clip 不会写入该文件。`--no-notify` 只关闭通知，不影响图片粘贴。在无图形桌面的 X11 主机上使用 `DISPLAY=:0 agy`（未设置 display 变量时，agy 会显示 `Can't read your clipboard over SSH`，且不会调用 shim）；shim 通过 SSH 获取图片，因此无需真实 X server。确保 `~/.local/bin` 在 PATH 中优先于 `/usr/bin`。Wayland 会话需要在远程安装 `cc-clip install --target wl-paste`。此集成仅转发图片，不转发视频。
 
 对于 Codex 目标，cc-clip 会尝试使用 `apt` 或 `dnf` 安装 Xvfb。如果
 无法使用免密码 `sudo`，它会停止并输出准确的安装命令；
@@ -131,8 +131,8 @@ hook 会被保留。
 标志即可继续使用包管理的二进制。用 `--local-bin` 部署可将主机切回上传
 模式。同一次运行中该标志不能与 `--local-bin` 组合。
 
-> opencode 和 Antigravity 的集成生成已有测试覆盖，但尚未在代表性主机上
-> 对事件交付进行冒烟测试。请
+> Antigravity 的 Stop 通知已在 agy 1.5.16 上完成端到端验证。opencode 的集成生成已有测试覆盖，
+> 但尚未在代表性主机上对事件交付进行冒烟测试。请
 > [报告测试结果](https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/issues)。
 >
 > Kimi Code 和 MastraCode 通过 shim 会拦截的 `wl-paste` / `xclip` 调用读取

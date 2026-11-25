@@ -1,4 +1,4 @@
-<!-- i18n-source: README.md @ 7fdeff5f8453fe8c74125f3dead11c710941ab15 -->
+<!-- i18n-source: README.md @ 5ef5d92c08c24a2b8098755de9eab8f8ec8358ee -->
 
 > Personal fork of [ShunmeiCho/cc-clip](https://github.com/ShunmeiCho/cc-clip), maintained by nhocconan. See the [installation instructions](README.md#1-install).
 
@@ -100,10 +100,10 @@ cc-clip doctor --host myserver
 | Codex CLI のみ | `cc-clip setup myserver --codex` | はい | はい | Xvfb。セットアップにリモートの `sudo` が必要な場合があります |
 | すべての統合 | `cc-clip setup myserver --all` | はい | はい | Codex には Xvfb |
 | opencode | `cc-clip setup myserver --opencode` | はい | はい | `xclip` または `wl-paste` |
-| Antigravity | `cc-clip setup myserver --agy` | はい | はい | agy 1.4.10、`xclip` または `wl-paste` shim |
+| Antigravity | `cc-clip setup myserver --agy` | はい | はい | agy 1.5.16、`xclip` または `wl-paste` shim |
 | Cursor CLI | `cc-clip setup myserver --cursor` | はい | はい | Cursor を実行する shell に `DISPLAY` または `WAYLAND_DISPLAY` が設定されていること |
 
-Antigravity の画像貼り付けは Linux の agy 1.4.10 で検証済みです。リモートで `agy update` を実行してから、ローカルで `cc-clip connect myserver --agy` を実行します。`--no-notify` でも画像貼り付けは有効です。ヘッドレス X11 ホストでは `DISPLAY=:0 agy` で起動します。shim が SSH 経由で画像を取得するため、実際の X server は不要です。PATH では `~/.local/bin` を `/usr/bin` より前に置いてください。Wayland セッションではリモートで `cc-clip install --target wl-paste` を実行します。動画の転送には対応していません。
+Antigravity の画像貼り付けと Stop 通知は Linux の agy 1.5.16 で検証済みです。リモートで `agy update` を実行してから、ローカルで `cc-clip connect myserver --agy` を実行します。agy 自体は SSH 越しの画像読み取りを X11 または Wayland forwarding (`ssh -X`) でしか行わず、独自の clipboard bridge はないため、通常の SSH セッションで `Ctrl+V` を動かすのは引き続き cc-clip です。通知には cc-clip v0.13.7 以降が必要です。agy 1.4.3 以降はプラグインの hook をルートの `hooks.json` からしか読み込まず、それ以前の cc-clip はこのファイルを書いていませんでした。`--no-notify` でも画像貼り付けは有効です。ヘッドレス X11 ホストでは `DISPLAY=:0 agy` で起動します。display 変数がないと agy は `Can't read your clipboard over SSH` と表示し、shim を呼び出しません。shim が SSH 経由で画像を取得するため、実際の X server は不要です。PATH では `~/.local/bin` を `/usr/bin` より前に置いてください。Wayland セッションではリモートで `cc-clip install --target wl-paste` を実行します。動画の転送には対応していません。
 
 Codex ターゲットでは、cc-clip は `apt` または `dnf` を使って Xvfb のインストールを試みます。
 passwordless `sudo` が使えない場合は停止し、正確なインストールコマンドを表示します。
@@ -133,8 +133,8 @@ asdf のインストールも見つかります）、バージョンとハッシ
 パッケージ管理バイナリを使い続けます。`--local-bin` でデプロイすると、ホストは
 アップロード方式へ戻ります。同一実行内でこのフラグと `--local-bin` は併用できません。
 
-> opencode と Antigravity の統合生成はテストでカバーされていますが、代表的なマシンでの
-> ホストイベント配信はまだ smoke test されていません。
+> Antigravity の Stop 通知は agy 1.5.16 でエンドツーエンド検証済みです。opencode の統合生成は
+> テストでカバーされていますが、代表的なマシンでのホストイベント配信はまだ smoke test されていません。
 > 結果を [報告してください](https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/issues)。
 >
 > Kimi Code と MastraCode は shim がインターセプトする `wl-paste` / `xclip` 呼び出しで
