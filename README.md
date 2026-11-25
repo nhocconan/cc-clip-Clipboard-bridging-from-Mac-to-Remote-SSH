@@ -111,11 +111,16 @@ Choose one selector per setup. With no selector, cc-clip configures Claude Code.
 | Codex CLI only | `cc-clip setup myserver --codex` | Yes | Yes | Xvfb; setup may need remote `sudo` |
 | All integrations | `cc-clip setup myserver --all` | Yes | Yes | Xvfb for Codex |
 | opencode | `cc-clip setup myserver --opencode` | Yes | Yes | `xclip` or `wl-paste` |
-| Antigravity | `cc-clip setup myserver --agy` | Yes | Yes | agy 1.4.10; `xclip` or `wl-paste` shim |
+| Antigravity | `cc-clip setup myserver --agy` | Yes | Yes | agy 1.5.16; `xclip` or `wl-paste` shim |
 | Cursor CLI | `cc-clip setup myserver --cursor` | Yes | Yes | `DISPLAY` or `WAYLAND_DISPLAY` set in Cursor's shell |
 
-Antigravity image paste is verified with agy 1.4.10 on Linux. Upgrade agy on
-the remote with `agy update`, then deploy with `cc-clip connect myserver --agy`.
+Antigravity image paste and Stop notifications are verified with agy 1.5.16 on
+Linux. Upgrade agy on the remote with `agy update`, then deploy with
+`cc-clip connect myserver --agy`. agy itself reads images over SSH only through
+X11 or Wayland forwarding (`ssh -X`); it has no clipboard bridge of its own, so
+cc-clip is still what makes `Ctrl+V` work on a plain SSH session. Notifications
+need cc-clip v0.13.7 or later: agy 1.4.3+ loads plugin hooks only from a
+root-level `hooks.json`, which earlier cc-clip releases did not write.
 `--no-notify` skips notification hooks while keeping image paste enabled.
 
 On a headless X11 host, start the CLI with:
@@ -124,7 +129,8 @@ On a headless X11 host, start the CLI with:
 DISPLAY=:0 agy
 ```
 
-agy requires a display variable before it calls `xclip`. The cc-clip shim reads
+agy requires a display variable before it calls `xclip`; without one it shows
+`Can't read your clipboard over SSH` and never asks the shim. The cc-clip shim reads
 images through the SSH tunnel, so this invocation does not require an X server.
 Keep `~/.local/bin` ahead of `/usr/bin` in `PATH`. In a Wayland session, install
 the wl-paste shim instead (`cc-clip install --target wl-paste` on the remote).
@@ -161,8 +167,9 @@ suggests — keep using the package-managed binary without needing the flag
 again. Deploy with `--local-bin` to switch the host back to uploaded
 binaries. The flag cannot be combined with `--local-bin` in the same run.
 
-> opencode and Antigravity integration generation is covered by tests, but host
-> event delivery has not yet been smoke-tested on a representative machine.
+> Antigravity Stop notifications are verified end to end with agy 1.5.16. opencode
+> integration generation is covered by tests, but host event delivery has not yet
+> been smoke-tested on a representative machine.
 > Please [report what you find](https://github.com/nhocconan/cc-clip-Clipboard-bridging-from-Mac-to-Remote-SSH/issues).
 >
 > Kimi Code and MastraCode read the clipboard through `wl-paste` / `xclip`

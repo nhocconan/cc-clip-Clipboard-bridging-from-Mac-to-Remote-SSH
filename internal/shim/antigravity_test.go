@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -91,15 +92,47 @@ func TestAntigravityPluginJSONValid(t *testing.T) {
 	}
 }
 
-// parseAgyHooks unmarshals the generated hooks.json into a generic shape so the
-// Stop entry's command/type/timeout can be asserted.
+// parseAgyHooks unmarshals the generated ROOT hooks.json (agy 1.4.3+ named-hook
+// shape: {hookName: {event: [handlers]}}) and returns the cc-clip hook's events
+// so the Stop entry's command/type/timeout can be asserted.
 func parseAgyHooks(t *testing.T, port int) map[string][]map[string]interface{} {
 	t.Helper()
-	var h map[string][]map[string]interface{}
+	var h map[string]map[string][]map[string]interface{}
 	if err := json.Unmarshal([]byte(antigravityHooksJSON(port)), &h); err != nil {
-		t.Fatalf("hooks.json is not valid JSON: %v", err)
+		t.Fatalf("root hooks.json must be {hookName: {event: [handlers]}}: %v\n%s", err, antigravityHooksJSON(port))
 	}
-	return h
+	if len(h) != 1 {
+		t.Fatalf("root hooks.json must define exactly one named hook, got %d", len(h))
+	}
+	events, ok := h["cc-clip-notify"]
+	if !ok {
+		t.Fatalf("root hooks.json must name its hook cc-clip-notify, got %v", h)
+	}
+	return events
+}
+
+// The flat {"Stop": [...]} shape at the root is what agy 1.5.16 rejects with
+// "cannot unmarshal array into ... JSONHookSpec" and skips entirely; it must
+// never come back to the root file.
+func TestAntigravityRootHooksJSONIsNotFlatShape(t *testing.T) {
+	var flat map[string][]interface{}
+	if err := json.Unmarshal([]byte(antigravityHooksJSON(18339)), &flat); err == nil {
+		t.Fatalf("root hooks.json must not use the flat event->array shape:\n%s", antigravityHooksJSON(18339))
+	}
+}
+
+// hooks/hooks.json keeps the flat shape early agy (1.0.x) reads from that path.
+func TestAntigravityLegacyHooksJSONFlatShape(t *testing.T) {
+	var h map[string][]map[string]interface{}
+	if err := json.Unmarshal([]byte(antigravityLegacyHooksJSON(9999)), &h); err != nil {
+		t.Fatalf("legacy hooks/hooks.json must be flat {event: [handlers]}: %v", err)
+	}
+	if len(h) != 1 || len(h["Stop"]) != 1 {
+		t.Fatalf("legacy hooks/hooks.json must hold exactly one Stop handler, got %v", h)
+	}
+	if cmd, _ := h["Stop"][0]["command"].(string); cmd != "env CC_CLIP_PORT=9999 cc-clip plugin run agy-notify" {
+		t.Fatalf("legacy Stop command = %q", cmd)
+	}
 }
 
 func TestAntigravityHooksJSONDefaultPort(t *testing.T) {
@@ -147,7 +180,9 @@ func TestBuildAntigravityPluginScript(t *testing.T) {
 		"agy-plugin-src.",
 		"cc-clip-notify",
 		`mkdir -p "$pdir/hooks"`,
-		"hooks/hooks.json",
+		`cat > "$pdir/hooks.json"`,
+		`cat > "$pdir/hooks/hooks.json"`,
+		`"cc-clip-notify": {`,
 		"plugin.json",
 		"agy plugin validate",
 		"agy plugin install",
@@ -198,8 +233,10 @@ func TestEnsureRemoteAntigravityPluginSurfacesExecError(t *testing.T) {
 //   - the agy binary must be resolvable on PATH.
 //
 // It runs against an isolated HOME so the install lands in a throwaway dir.
-// This proves the layout (hooks/hooks.json) is accepted; it is NOT proof the
-// hook fires (that requires a real Stop event and remains future doctor work).
+// It asserts agy's validator counts the Stop hook (agy 1.4.3+ silently skips
+// an unreadable hooks.json yet still lists the plugin, so "listed" alone proved
+// nothing). It is NOT proof the hook fires: that needs a real Stop event, which
+// `cc-clip doctor --host` reports as a delivery receipt.
 func TestEnsureRemoteAntigravityPluginSmoke(t *testing.T) {
 	if os.Getenv("CC_CLIP_AGY_SMOKE") != "1" {
 		t.Skip("set CC_CLIP_AGY_SMOKE=1 to run the agy install smoke test")
@@ -214,8 +251,12 @@ func TestEnsureRemoteAntigravityPluginSmoke(t *testing.T) {
 		out, err := c.CombinedOutput()
 		return string(out), err
 	}
-	if out, err := run(buildAntigravityPluginScript(18339)); err != nil {
+	out, err := run(buildAntigravityPluginScript(18339))
+	if err != nil {
 		t.Fatalf("agy validate+install failed: %v\n%s", err, out)
+	}
+	if !regexp.MustCompile(`hooks\s+1\b`).MatchString(out) {
+		t.Fatalf("agy validate must count exactly one loaded hook:\n%s", out)
 	}
 	list, err := run("agy plugin list")
 	if err != nil {

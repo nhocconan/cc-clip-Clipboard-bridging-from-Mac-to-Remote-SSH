@@ -871,10 +871,11 @@ func maybePrintCursorNotice(out io.Writer, t DeployTargets) {
 	}
 }
 
-const agyClipboardNotice = `      Antigravity image paste (tested with agy 1.4.10):
+const agyClipboardNotice = `      Antigravity image paste (tested with agy 1.5.16):
       Use 'agy update' on the remote if paste reports an unsupported terminal.
       Keep ~/.local/bin ahead of /usr/bin in PATH so agy finds the cc-clip shim.
       On headless X11 hosts, launch with: DISPLAY=:0 agy
+      ("Can't read your clipboard over SSH" means DISPLAY is unset in agy's shell.)
       The shim serves the image through SSH; this does not require an X server.
       A Wayland session instead needs the wl-paste shim installed.`
 

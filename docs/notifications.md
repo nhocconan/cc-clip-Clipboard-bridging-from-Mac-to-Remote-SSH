@@ -32,7 +32,7 @@ Image paste notifications help you track what was pasted without leaving your wo
 | Antigravity (agy) | ✅ If an Antigravity target (`--agy`/`--all`) is selected and agy is detected ¹ | `agy-notify` plugin installed via the `agy` CLI |
 | Cursor CLI | ✅ If a Cursor target (`--cursor`/`--all`) is selected and Cursor is detected ¹ | Stop hook merged into `~/.cursor/hooks.json` (your own hooks there are kept) |
 
-¹ "Wired" means `cc-clip connect` installs the integration. Plugin generation and runner paths are covered by tests, but host event delivery for opencode, Antigravity and Cursor has not yet been smoke-verified on a representative host. `cc-clip doctor --host <host>` shows when each of them last delivered a notification, so you can confirm it on your own machine — please report issues.
+¹ "Wired" means `cc-clip connect` installs the integration. Plugin generation and runner paths are covered by tests. Antigravity Stop delivery is verified end to end with agy 1.5.16 (it needs cc-clip v0.13.7+: agy 1.4.3+ reads plugin hooks only from a root-level `hooks.json`); host event delivery for opencode and Cursor has not yet been smoke-verified on a representative host. `cc-clip doctor --host <host>` shows when each of them last delivered a notification, so you can confirm it on your own machine — please report issues.
 
 ## Setup (Claude Code)
 

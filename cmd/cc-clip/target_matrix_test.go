@@ -90,7 +90,7 @@ func TestAgyClipboardNotice(t *testing.T) {
 	for _, targets := range []DeployTargets{{Antigravity: true}, {Claude: true, Antigravity: true}} {
 		var out bytes.Buffer
 		maybePrintAgyNotice(&out, targets)
-		for _, text := range []string{"1.4.10", "DISPLAY=:0 agy", "wl-paste"} {
+		for _, text := range []string{"1.5.16", "DISPLAY=:0 agy", "wl-paste"} {
 			if !strings.Contains(out.String(), text) {
 				t.Errorf("missing %q in notice: %s", text, out.String())
 			}
